@@ -1,7 +1,7 @@
-import './SideBar.css'
-import { useAuth } from '../../services/AuthProvider';
-import { useState, useRef, useEffect } from 'react';
-import { Link } from 'react-router-dom';
+import "./SideBar.css";
+import { useAuth } from "../../services/AuthProvider";
+import { useState, useRef, useEffect } from "react";
+import { Link } from "react-router-dom";
 const USER_ITEMS = [
   {
     id: "dashboard",
@@ -53,35 +53,44 @@ const ADMIN_ITEMS = [
   },
 ];
 
-
-export default function SideBar({ active, setActive } : { active: boolean; setActive: (active: boolean) => void }) {
+export default function SideBar({
+  active,
+  setActive,
+}: {
+  active: boolean;
+  setActive: (active: boolean) => void;
+}) {
   const { user, handleLogout } = useAuth();
-  const [activeItem, setActiveItem] = useState<string>('dashboard');
+  const [activeItem, setActiveItem] = useState<string>("dashboard");
   const [dropDownOpen, setDropdownOpen] = useState<boolean>(false);
   const dropdownRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const avatarUrl = user?.user_metadata?.picture;
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node) &&
-        profileRef.current && !profileRef.current.contains(event.target as Node)) {
+      if (
+        dropdownRef.current &&
+        !dropdownRef.current.contains(event.target as Node) &&
+        profileRef.current &&
+        !profileRef.current.contains(event.target as Node)
+      ) {
         setDropdownOpen(false);
       }
     };
 
-    document.addEventListener('mousedown', handleClickOutside);
+    document.addEventListener("mousedown", handleClickOutside);
     return () => {
-      document.removeEventListener('mousedown', handleClickOutside);
+      document.removeEventListener("mousedown", handleClickOutside);
     };
   }, []);
 
   return (
-    <nav className={`app-sidebar ${active ? '' : 'minimized'}`} id="app-sidebar">
-
+    <nav
+      className={`app-sidebar ${active ? "" : "minimized"}`}
+      id="app-sidebar"
+    >
       <button className="sb-logo" onClick={() => setActive(!active)}>
-        <div className="sb-logo-mark">
-          S
-        </div>
+        <div className="sb-logo-mark">S</div>
         <div className="sb-logo-text">
           Smart Home UIA
           <span>Intelligent Living</span>
@@ -89,46 +98,72 @@ export default function SideBar({ active, setActive } : { active: boolean; setAc
       </button>
 
       <div className="sb-nav">
-
         <div className="sb-section-label">Navigation</div>
         {USER_ITEMS.map((item) => (
-          <Link to={item.href} className={`sb-item${item.id === activeItem ? ' active' : ''}`} key={item.id} onClick={() => setActiveItem(item.id)}>
-            <div className="sb-item-icon"><i className={item.icon}></i></div>
+          <Link
+            to={item.href}
+            className={`sb-item${item.id === activeItem ? " active" : ""}`}
+            key={item.id}
+            onClick={() => setActiveItem(item.id)}
+          >
+            <div className="sb-item-icon">
+              <i className={item.icon}></i>
+            </div>
             <span className="sb-item-label">{item.label}</span>
             {item.badge && <span className="sb-badge">3</span>}
           </Link>
         ))}
         <div className="sb-section-label">Admin</div>
         {ADMIN_ITEMS.map((item) => (
-          <Link to={item.href} className={`sb-item${item.id === activeItem ? ' active' : ''}`} key={item.id} onClick={() => setActiveItem(item.id)}>
-            <div className="sb-item-icon"><i className={item.icon}></i></div>
+          <Link
+            to={item.href}
+            className={`sb-item${item.id === activeItem ? " active" : ""}`}
+            key={item.id}
+            onClick={() => setActiveItem(item.id)}
+          >
+            <div className="sb-item-icon">
+              <i className={item.icon}></i>
+            </div>
             <span className="sb-item-label">{item.label}</span>
             {item.adminTag && <span className="sb-admin-tag">Admin</span>}
           </Link>
         ))}
-
       </div>
 
       <div className="sb-footer">
-        <div className={`sb-dropdown ${dropDownOpen ? 'open' : ''}`} id="sb-dropdown" ref={dropdownRef}>
+        <div
+          className={`sb-dropdown ${dropDownOpen ? "open" : ""}`}
+          id="sb-dropdown"
+          ref={dropdownRef}
+        >
           <a href="#" className="sb-dd-item" id="dd-profile">
             <i className="fa-solid fa-user"></i>
             Edit Profile
           </a>
-          <div className="sb-dd-item logout" id="dd-logout" onClick={(e) => {
-            handleLogout(e);
-          }}>
+          <div
+            className="sb-dd-item logout"
+            id="dd-logout"
+            onClick={(e) => {
+              handleLogout(e);
+            }}
+          >
             <i className="fa-solid fa-arrow-right-from-bracket"></i>
             Sign Out
           </div>
         </div>
 
-        <div className={`sb-user-chip ${dropDownOpen ? 'open' : ''}`} id="sb-user-chip" ref={profileRef} onClick={() => setDropdownOpen(!dropDownOpen)}>
+        <div
+          className={`sb-user-chip ${dropDownOpen ? "open" : ""}`}
+          id="sb-user-chip"
+          ref={profileRef}
+          onClick={() => setDropdownOpen(!dropDownOpen)}
+        >
           <div className="sb-avatar">
             {avatarUrl ? (
               <img
                 src={avatarUrl}
                 alt="User Avatar"
+                style={{ width: "100%", height: "100%" }}
               />
             ) : (
               <div className="avatar-fallback">
@@ -137,13 +172,14 @@ export default function SideBar({ active, setActive } : { active: boolean; setAc
             )}
           </div>
           <div className="sb-user-info">
-            <div className="sb-user-name">{user?.user_metadata?.full_name || user?.email}</div>
+            <div className="sb-user-name">
+              {user?.user_metadata?.full_name || user?.email}
+            </div>
             <div className="sb-user-role">{user?.role}</div>
           </div>
           <i className="fa-solid fa-chevron-up sb-chevron"></i>
         </div>
       </div>
-
     </nav>
   );
 }
