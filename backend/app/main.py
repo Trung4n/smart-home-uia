@@ -1,9 +1,84 @@
+from contextlib import asynccontextmanager
+
 from fastapi import FastAPI
-from app.supabase.client import supabase
+from fastapi.middleware.cors import CORSMiddleware
+# from fastapi.middleware.trustedhost import TrustedHostMiddleware
 
-app = FastAPI(title="Smart Home UIA API")
+from app.core.config import settings
+from app.core.exceptions import AppException
+from app.core.exception_handlers import app_exception_handler
 
-@app.get("/")
-def read_root():
-    response = supabase.table("users").select("*").limit(5).execute()
-    return {"data": response.data}
+from app.api.router import api_router
+from app.services.device_service import DeviceService
+from app.repositories.device_repository import DeviceRepository
+from app.database.supabase import supabase
+
+from app.utils.logger import get_logger
+
+logger = get_logger(__name__)
+
+@asynccontextmanager
+async def lifespan(app: FastAPI):
+    try:
+        # --- Startup ---
+        app.state.device_service = DeviceService(
+            repo=DeviceRepository(db=supabase)
+        )
+
+        # await mqtt_client.connect()
+        yield
+
+    except Exception as e:
+        logger.error(f"Startup error: {e}")
+        raise
+
+    finally:
+        # --- Shutdown ---
+        # await mqtt_client.disconnect()
+        pass
+
+
+app = FastAPI(
+    title=settings.APP_NAME,
+    debug=settings.DEBUG,
+    lifespan=lifespan,
+)
+
+def setup_middleware(app: FastAPI) -> None:
+    # CORS
+    app.add_middleware(
+        CORSMiddleware,
+        allow_origins=settings.COR_ORIGINS,
+        allow_credentials=True,
+        allow_methods=["*"],
+        allow_headers=["*"],
+    )
+
+    # Production security (optional)
+    # if settings.ENVIRONMENT == "production":
+    #     app.add_middleware(
+    #         TrustedHostMiddleware,
+    #         allowed_hosts=[""],
+    #     )
+
+
+def setup_exception_handlers(app: FastAPI) -> None:
+    app.add_exception_handler(AppException, app_exception_handler)
+
+
+def setup_routes(app: FastAPI) -> None:
+    app.include_router(api_router, prefix="/api")
+
+
+@app.get("/health", tags=["System"])
+def health_check():
+    return {
+        "status": "uia",
+        "env": settings.ENVIRONMENT,
+    }
+
+
+# Bootstrap application
+setup_middleware(app)
+setup_exception_handlers(app)
+setup_routes(app)
