@@ -11,3 +11,9 @@ def get_device_service(request: Request) -> DeviceService:
 
 def get_sensor_service(request: Request) -> SensorService:
     return request.app.state.sensor_service
+
+def get_alert_threshold_service(request: Request) -> AlertThresholdService:
+    return request.app.state.alert_threshold_service
+
+def get_device_control_service(request: Request) -> DeviceControlService:
+    return request.app.state.device_control_service

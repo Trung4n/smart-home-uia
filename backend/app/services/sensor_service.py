@@ -1,4 +1,5 @@
-from app.repositories.sensor_repository import SensorRepository
+# from app.schemas.sensor import SensorCreate
+from app.repositories import SensorRepository
 from app.core.exceptions import *
 
 from app.utils.logger import get_logger

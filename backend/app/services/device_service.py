@@ -1,5 +1,5 @@
 from app.schemas.device import DeviceCreate, DeviceUpdate
-from app.repositories.device_repository import DeviceRepository
+from app.repositories import DeviceRepository
 from app.core.exceptions import *
 
 from app.utils.logger import get_logger

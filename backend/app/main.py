@@ -28,6 +28,14 @@ async def lifespan(app: FastAPI):
             repo=SensorRepository(db=supabase)
         )
 
+        app.state.alert_threshold_service = AlertThresholdService(
+            repo=AlertThresholdRepository(db=supabase)
+        )
+
+        app.state.device_control_service = DeviceControlService(
+            repo=DeviceControlRepository(db=supabase)
+        )
+
         # await mqtt_client.connect()
         yield
 

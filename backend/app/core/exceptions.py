@@ -18,6 +18,11 @@ class SensorNotFoundException(NotFoundException):
     def __init__(self, sensor_id: int):
         super().__init__(f"Sensor {sensor_id} not found")
 
+class AlertThresholdNotFoundException(NotFoundException):
+    def __init__(self, alert_threshold_id: int):
+        super().__init__(f"Alert threshold {alert_threshold_id} not found")
+
+
 # 400 
 class ValidationException(AppException):
     def __init__(self, message: str = "Validation failed", status_code: int = 400):

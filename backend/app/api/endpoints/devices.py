@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends, status
 from app.schemas.device import DeviceCreate, DeviceUpdate, DeviceResponse
-from app.services.device_service import DeviceService
-from app.core.dependencies import get_device_service, get_current_user
+from app.services import DeviceService
+from app.core.dependencies import *
 
 router = APIRouter(
     tags=["Devices"],
