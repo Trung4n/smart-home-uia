@@ -1,0 +1,27 @@
+services:
+  mosquitto:
+    image: eclipse-mosquitto:2.0
+    container_name: mqtt_broker
+    restart: unless-stopped
+    ports:
+      - "1883:1883" # MQTT TCP  -> firmware / backend
+      - "9001:9001" # WebSocket -> frontend browser
+    volumes:
+      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./data:/mosquitto/data
+      - ./log:/mosquitto/log
+    healthcheck:
+      test:
+        [
+          "CMD",
+          "mosquitto_sub",
+          "-t",
+          "$$SYS/#",
+          "-C",
+          "1",
+          "-i",
+          "healthcheck",
+        ]
+      interval: 30s
+      timeout: 10s
+      retries: 3

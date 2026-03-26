@@ -12,7 +12,7 @@ from app.api.router import api_router
 from app.services import *
 from app.repositories import *
 from app.database.supabase import supabase
-
+from app.mqtt.client import start_mqtt
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -20,6 +20,7 @@ logger = get_logger(__name__)
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     try:
+        start_mqtt()
         # --- Startup ---
         app.state.device_service = DeviceService(
             repo=DeviceRepository(db=supabase)
