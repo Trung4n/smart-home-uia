@@ -35,6 +35,18 @@ async def lifespan(app: FastAPI):
         app.state.device_control_service = DeviceControlService(
             repo=DeviceControlRepository(db=supabase)
         )
+        
+        app.state.notification_service = NotificationService(
+            repo=NotificationRepository(db=supabase)
+        )
+
+        app.state.automation_rule_service = AutomationRuleService(
+            repo=AutomationRuleRepository(db=supabase)
+        )
+
+        app.state.sensor_log_service = SensorLogService(
+            repo=SensorLogRepository(db=supabase)
+        )
 
         # await mqtt_client.connect()
         yield

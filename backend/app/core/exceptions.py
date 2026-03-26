@@ -22,6 +22,14 @@ class AlertThresholdNotFoundException(NotFoundException):
     def __init__(self, alert_threshold_id: int):
         super().__init__(f"Alert threshold {alert_threshold_id} not found")
 
+class NotificationNotFoundException(NotFoundException):
+    def __init__(self, notification_id: int):
+        super().__init__(f"Notification {notification_id} not found")
+
+
+class AutomationRuleNotFoundException(NotFoundException):
+    def __init__(self, automation_rule_id: int):
+        super().__init__(f"Automation rule {automation_rule_id} not found")
 
 # 400 
 class ValidationException(AppException):
