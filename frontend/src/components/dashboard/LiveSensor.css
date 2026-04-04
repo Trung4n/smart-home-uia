@@ -1,0 +1,170 @@
+
+
+.sensor-card {
+  background: var(--white);
+  border: 3px solid var(--border);
+  box-shadow: var(--shadow);
+  padding: 12px 14px;
+  position: relative;
+  overflow: hidden;
+  transition:
+    transform 0.15s,
+    box-shadow 0.15s;
+}
+
+.sensor-card:hover {
+  transform: translate(-2px, -2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.sensor-card::after {
+  content: "";
+  position: absolute;
+  top: 0;
+  right: 0;
+  width: 34px;
+  height: 34px;
+  border-left: 3px solid var(--border);
+  border-bottom: 3px solid var(--border);
+  background: var(--bg2);
+  transform: translate(3px, -3px);
+}
+
+.sensor-card.alert-state {
+  border-color: var(--error);
+  box-shadow: 4px 4px 0 var(--error);
+}
+.sensor-card.warn-state {
+  border-color: var(--warning);
+  box-shadow: 4px 4px 0 var(--warning);
+}
+
+.sensor-top {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin-bottom: 6px;
+}
+
+.sensor-icon {
+  width: 30px;
+  height: 30px;
+  background: var(--bg2);
+  border: 2px solid var(--border);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 13px;
+  color: var(--primary);
+  flex-shrink: 0;
+}
+
+.sensor-card:nth-child(2) .sensor-icon {
+  color: var(--success);
+}
+.sensor-card:nth-child(3) .sensor-icon {
+  color: #b45309;
+}
+.sensor-card.alert-state .sensor-icon {
+  color: var(--error);
+  background: #fee2e2;
+}
+.sensor-card.warn-state .sensor-icon {
+  color: var(--warning);
+  background: #fff7ed;
+}
+
+.sensor-name {
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  color: var(--muted);
+}
+
+.sensor-value-row {
+  display: flex;
+  align-items: flex-end;
+  gap: 5px;
+  margin-bottom: 7px;
+}
+
+.sensor-value {
+  font-family: var(--font-head);
+  font-size: 38px;
+  font-weight: 800;
+  color: var(--border);
+  line-height: 1;
+  letter-spacing: -2px;
+  transition: color 0.3s;
+}
+
+.sensor-card.alert-state .sensor-value {
+  color: var(--error);
+}
+.sensor-card.warn-state .sensor-value {
+  color: var(--warning);
+}
+
+.sensor-unit {
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 700;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+
+.sensor-footer {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  border-top: 2px solid var(--border);
+  padding-top: 7px;
+}
+
+.sensor-status {
+  font-family: var(--font-head);
+  font-size: 9px;
+  font-weight: 800;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  padding: 2px 7px;
+  border: 2px solid var(--border);
+}
+
+.sensor-status.normal {
+  background: var(--success);
+  color: var(--white);
+}
+.sensor-status.warning {
+  background: var(--warning);
+  color: var(--white);
+}
+.sensor-status.alert {
+  background: var(--error);
+  color: var(--white);
+}
+
+
+.spark-bar {
+  width: 5px;
+  background: var(--primary);
+  border: 1px solid var(--border);
+  min-height: 3px;
+  transition: height 0.4s ease;
+}
+
+.sensor-card:nth-child(2) .spark-bar {
+  background: var(--success);
+}
+.sensor-card:nth-child(3) .spark-bar {
+  background: var(--warning);
+}
+.sensor-card.alert-state .spark-bar {
+  background: var(--error);
+}
+.sensor-card.warn-state .spark-bar {
+  background: var(--warning);
+}

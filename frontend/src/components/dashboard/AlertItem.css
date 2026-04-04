@@ -1,0 +1,123 @@
+/* Notification items */
+.notif-item {
+  display: flex;
+  gap: 9px;
+  flex: 1;
+  border-bottom: 1.5px solid #e5e5e0;
+  align-items: center;
+  min-height: 0;
+}
+
+.notif-item:last-child {
+  border-bottom: none;
+}
+
+.notif-dot {
+  width: 9px;
+  height: 9px;
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+  align-self: flex-start;
+  margin-top: 4px;
+}
+
+.notif-dot.alert {
+  background: var(--error);
+}
+.notif-dot.warning {
+  background: var(--warning);
+}
+.notif-dot.system {
+  background: var(--primary);
+}
+.notif-dot.success {
+  background: var(--success);
+}
+.notif-dot.error {
+  background: var(--error);
+}
+.notif-dot.intrusion {
+  background: var(--error);
+}
+.notif-body {
+  flex: 1;
+  min-width: 0;
+}
+
+.notif-msg {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--border);
+  line-height: 1.35;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.notif-time {
+  font-size: 10px;
+  color: var(--muted);
+  margin-top: 1px;
+}
+
+.notif-type-tag {
+  font-family: var(--font-head);
+  font-size: 9px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.8px;
+  padding: 2px 6px;
+  border: 1.5px solid var(--border);
+  flex-shrink: 0;
+  white-space: nowrap;
+}
+
+.tag-alert {
+  background: #fee2e2;
+}
+.tag-warning {
+  background: #ffedd5;
+}
+.tag-system {
+  background: #dbeafe;
+}
+.tag-success {
+  background: #d1fae5;
+}
+.tag-error {
+  background: #fee2e2;
+}
+.tag-intrusion {
+  background: var(--error);
+}
+
+.btn-view-all {
+  display: block;
+  width: 100%;
+  margin-top: 8px;
+  background: var(--white);
+  border: 2.5px solid var(--border);
+  box-shadow: var(--shadow-sm);
+  padding: 6px;
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1.5px;
+  cursor: pointer;
+  text-align: center;
+  text-decoration: none;
+  color: var(--border);
+  transition:
+    background 0.15s,
+    transform 0.1s,
+    box-shadow 0.1s;
+  flex-shrink: 0;
+}
+
+.btn-view-all:hover {
+  background: var(--primary);
+  color: var(--white);
+  transform: translate(-1px, -1px);
+  box-shadow: var(--shadow);
+}
