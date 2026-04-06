@@ -1,6 +1,24 @@
 // Unfinished for now
 import './MainDashboard.css'
+import { Link } from 'react-router';
+import { type LightData, type DHT20Data } from '../../types/device';
+import { useWS } from '../../hooks/useWebSocket';
+import { useAlerts } from '../../hooks/useAlert';
+import { useDevices } from '../../hooks/useDevices';
+import { getSensorStatus, useThreshold } from '../../hooks/useSensorStatus';
+import DeviceItem from './DeviceItem';
+import SensorCard from './LiveSensor';
+import AlertItem from './AlertItem';
 export default function MainDashboard() {
+  const tempData = useWS<DHT20Data>('/5');
+  const humidityData = useWS<DHT20Data>('/5');
+  const lightData = useWS<LightData>('/3');
+  const thresholds = useThreshold();
+  const tempStatus = getSensorStatus(thresholds, 1, tempData?.temperature_c);
+  const humStatus = getSensorStatus(thresholds, 2, humidityData?.humidity_pct);
+  const lightStatus = getSensorStatus(thresholds, 3, lightData?.lux);
+  const devices = useDevices();
+  const alerts = useAlerts();
   return (
     <div className="main-content">
       <section>
@@ -10,81 +28,29 @@ export default function MainDashboard() {
         </div>
 
         <div className="sensor-grid">
-          <div className="sensor-card alert-state" id="sensor-temp">
-            <div className="sensor-top">
-              <div className="sensor-icon">
-                <i className="fa-solid fa-temperature-half"></i>
-              </div>
-              <span className="sensor-name">Temperature</span>
-            </div>
-            <div className="sensor-value-row">
-              <span className="sensor-value">27.4</span>
-              <span className="sensor-unit">°C</span>
-            </div>
-            <div className="sensor-footer">
-              <span className="sensor-status alert">ALERT</span>
-              <div className="sensor-sparkline">
-                <div className="spark-bar" style={{ height: '40%' }}></div>
-                <div className="spark-bar" style={{ height: '52%' }}></div>
-                <div className="spark-bar" style={{ height: '48%' }}></div>
-                <div className="spark-bar" style={{ height: '65%' }}></div>
-                <div className="spark-bar" style={{ height: '58%' }}></div>
-                <div className="spark-bar" style={{ height: '72%' }}></div>
-                <div className="spark-bar" style={{ height: '78%' }}></div>
-                <div className="spark-bar" style={{ height: '90%' }}></div>
-              </div>
-            </div>
-          </div>
+          <SensorCard
+            icon="fa-temperature-half"
+            label="Temperature"
+            value={tempData?.temperature_c}
+            unit="°C"
+            status={tempStatus}
+          />
 
-          <div className="sensor-card warn-state" id="sensor-humidity">
-            <div className="sensor-top">
-              <div className="sensor-icon">
-                <i className="fa-solid fa-droplet"></i>
-              </div>
-              <span className="sensor-name">Humidity</span>
-            </div>
-            <div className="sensor-value-row">
-              <span className="sensor-value">62.1</span>
-              <span className="sensor-unit">%</span>
-            </div>
-            <div className="sensor-footer">
-              <span className="sensor-status warning">WARNING</span>
-              <div className="sensor-sparkline">
-                <div className="spark-bar" style={{ height: '48%' }}></div>
-                <div className="spark-bar" style={{ height: '53%' }}></div>
-                <div className="spark-bar" style={{ height: '49%' }}></div>
-                <div className="spark-bar" style={{ height: '58%' }}></div>
-                <div className="spark-bar" style={{ height: '56%' }}></div>
-                <div className="spark-bar" style={{ height: '62%' }}></div>
-                <div className="spark-bar" style={{ height: '66%' }}></div>
-                <div className="spark-bar" style={{ height: '70%' }}></div>
-              </div>
-            </div>
-          </div>
+          <SensorCard
+            icon="fa-droplet"
+            label="Humidity"
+            value={humidityData?.humidity_pct}
+            unit="%"
+            status={humStatus}
+          />
 
-          <div className="sensor-card" id="sensor-light">
-            <div className="sensor-top">
-              <div className="sensor-icon"><i className="fa-solid fa-sun"></i></div>
-              <span className="sensor-name">Light Level</span>
-            </div>
-            <div className="sensor-value-row">
-              <span className="sensor-value">480</span>
-              <span className="sensor-unit">lux</span>
-            </div>
-            <div className="sensor-footer">
-              <span className="sensor-status normal">NORMAL</span>
-              <div className="sensor-sparkline">
-                <div className="spark-bar" style={{ height: '28%' }}></div>
-                <div className="spark-bar" style={{ height: '38%' }}></div>
-                <div className="spark-bar" style={{ height: '52%' }}></div>
-                <div className="spark-bar" style={{ height: '46%' }}></div>
-                <div className="spark-bar" style={{ height: '44%' }}></div>
-                <div className="spark-bar" style={{ height: '48%' }}></div>
-                <div className="spark-bar" style={{ height: '50%' }}></div>
-                <div className="spark-bar" style={{ height: '48%' }}></div>
-              </div>
-            </div>
-          </div>
+          <SensorCard
+            icon="fa-sun"
+            label="Light Level"
+            value={lightData?.lux.toFixed(0)}
+            unit="lux"
+            status={lightStatus}
+          />
         </div>
       </section>
 
@@ -92,131 +58,29 @@ export default function MainDashboard() {
         <div className="device-panel">
           <div className="section-head">
             <div className="section-title">Device Status</div>
-            <span className="section-meta" id="devices-online">5/6 Online</span>
+            <span className="section-meta" id="devices-online">{
+              devices.filter(d => d.status === 'online').length}/{devices.length} Online
+            </span>
           </div>
 
           <div className="device-list">
-            <div className="device-item on">
-              <div className="device-icon-box">
-                <i className="fa-solid fa-lightbulb"></i>
-              </div>
-              <div className="device-info">
-                <div className="device-name">
-                  Living Room Light
-                  <span className="device-badge on-badge">ON</span>
-                </div>
-                <div className="device-sub">Living Room · Smart Bulb</div>
-              </div>
-              <label className="toggle">
-                <input
-                  type="checkbox"
-                  className="device-toggle"
-                  data-id="d1"
-                  checked
-                />
-                <div className="toggle-track"></div>
-                <div className="toggle-thumb"></div>
-              </label>
-            </div>
-
-            <div className="device-item">
-              <div className="device-icon-box">
-                <i className="fa-solid fa-lightbulb"></i>
-              </div>
-              <div className="device-info">
-                <div className="device-name">
-                  Bedroom Light
-                  <span className="device-badge off-badge">OFF</span>
-                </div>
-                <div className="device-sub">Bedroom · Smart Bulb</div>
-              </div>
-              <label className="toggle">
-                <input type="checkbox" className="device-toggle" data-id="d2" />
-                <div className="toggle-track"></div>
-                <div className="toggle-thumb"></div>
-              </label>
-            </div>
-
-            <div className="device-item on">
-              <div className="device-icon-box">
-                <i className="fa-solid fa-fan"></i>
-              </div>
-              <div className="device-info">
-                <div className="device-name">
-                  Ceiling Fan <span className="device-badge on-badge">ON</span>
-                </div>
-                <div className="device-sub">Living Room · 3-speed</div>
-              </div>
-              <label className="toggle">
-                <input
-                  type="checkbox"
-                  className="device-toggle"
-                  data-id="d3"
-                  checked
-                />
-                <div className="toggle-track"></div>
-                <div className="toggle-thumb"></div>
-              </label>
-            </div>
-
-            <div className="device-item">
-              <div className="device-icon-box">
-                <i className="fa-solid fa-door-closed"></i>
-              </div>
-              <div className="device-info">
-                <div className="device-name">
-                  Front Door
-                  <span className="device-badge off-badge">UNLOCKED</span>
-                </div>
-                <div className="device-sub">Entrance · Smart Lock</div>
-              </div>
-              <label className="toggle">
-                <input type="checkbox" className="device-toggle" data-id="d4" />
-                <div className="toggle-track"></div>
-                <div className="toggle-thumb"></div>
-              </label>
-            </div>
-
-            <div className="device-item">
-              <div className="device-icon-box">
-                <i className="fa-solid fa-snowflake"></i>
-              </div>
-              <div className="device-info">
-                <div className="device-name">
-                  AC Unit <span className="device-badge off-badge">OFF</span>
-                </div>
-                <div className="device-sub">Bedroom · 18000 BTU</div>
-              </div>
-              <label className="toggle">
-                <input type="checkbox" className="device-toggle" data-id="d5" />
-                <div className="toggle-track"></div>
-                <div className="toggle-thumb"></div>
-              </label>
-            </div>
-
-            <div className="device-item on">
-              <div className="device-icon-box">
-                <i className="fa-solid fa-video"></i>
-              </div>
-              <div className="device-info">
-                <div className="device-name">
-                  Security Camera
-                  <span className="device-badge on-badge">ON</span>
-                </div>
-                <div className="device-sub">Garden · 1080p Live</div>
-              </div>
-              <label className="toggle">
-                <input
-                  type="checkbox"
-                  className="device-toggle"
-                  data-id="d6"
-                  checked
-                />
-                <div className="toggle-track"></div>
-                <div className="toggle-thumb"></div>
-              </label>
-            </div>
+            {devices.slice(0, 6).map((device) => (
+              <DeviceItem
+                key={device.device_id}
+                name={device.device_name}
+                type={device.device_type}
+                location={device.location}
+                isOn={device.status === 'online'}
+              />
+            ))}
           </div>
+          <Link to="/devices" className="btn-view-all">
+            <i
+              className="fa-solid fa-list"
+              style={{ marginRight: '5px', fontSize: '9px' }}
+            ></i>
+            View All Devices
+          </Link>
         </div>
 
         <div className="notif-panel">
@@ -225,103 +89,24 @@ export default function MainDashboard() {
             <span className="section-meta">Last 24 hours</span>
           </div>
 
-          <div className="notif-list">
-            <div className="notif-item">
-              <div className="notif-dot alert"></div>
-              <div className="notif-body">
-                <div className="notif-msg">
-                  Temperature exceeded threshold (34°C) in Living Room
-                </div>
-                <div className="notif-time">2 min ago</div>
-              </div>
-              <div className="notif-type-tag tag-alert">Alert</div>
-            </div>
-
-            <div className="notif-item">
-              <div className="notif-dot system"></div>
-              <div className="notif-body">
-                <div className="notif-msg">
-                  Yolo:Bit connection re-established successfully
-                </div>
-                <div className="notif-time">14 min ago</div>
-              </div>
-              <div className="notif-type-tag tag-system">System</div>
-            </div>
-
-            <div className="notif-item">
-              <div className="notif-dot warning"></div>
-              <div className="notif-body">
-                <div className="notif-msg">
-                  Humidity rising rapidly — now at 62%, trend upward
-                </div>
-                <div className="notif-time">28 min ago</div>
-              </div>
-              <div className="notif-type-tag tag-warning">Warning</div>
-            </div>
-
-            <div className="notif-item">
-              <div className="notif-dot alert"></div>
-              <div className="notif-body">
-                <div className="notif-msg">
-                  Motion detected at Front Door sensor (Zone 1)
-                </div>
-                <div className="notif-time">45 min ago</div>
-              </div>
-              <div className="notif-type-tag tag-alert">Alert</div>
-            </div>
-
-            <div className="notif-item">
-              <div className="notif-dot success"></div>
-              <div className="notif-body">
-                <div className="notif-msg">
-                  Auto-mode lights OFF at 23:00 completed
-                </div>
-                <div className="notif-time">1 hr ago</div>
-              </div>
-              <div className="notif-type-tag tag-success">OK</div>
-            </div>
-
-            <div className="notif-item">
-              <div className="notif-dot system"></div>
-              <div className="notif-body">
-                <div className="notif-msg">
-                  Firmware update available for Yolo:Bit v2.4.1
-                </div>
-                <div className="notif-time">3 hr ago</div>
-              </div>
-              <div className="notif-type-tag tag-system">System</div>
-            </div>
-
-            <div className="notif-item">
-              <div className="notif-dot warning"></div>
-              <div className="notif-body">
-                <div className="notif-msg">
-                  Living Room Light has been ON for over 6 hours
-                </div>
-                <div className="notif-time">4 hr ago</div>
-              </div>
-              <div className="notif-type-tag tag-warning">Warning</div>
-            </div>
-
-            <div className="notif-item">
-              <div className="notif-dot success"></div>
-              <div className="notif-body">
-                <div className="notif-msg">
-                  Daily energy report generated and saved
-                </div>
-                <div className="notif-time">6 hr ago</div>
-              </div>
-              <div className="notif-type-tag tag-success">OK</div>
-            </div>
+          <div className='notif-list'>
+            {alerts.slice(0, 8).map((alert) => (
+              <AlertItem
+                key={alert.notification_id}
+                type={alert.notification_type}
+                msg={alert.description}
+                time={alert.created_at}
+              />
+            ))}
           </div>
 
-          <a href="notifications.html" className="btn-view-all">
+          <Link to="/notifications" className="btn-view-all">
             <i
               className="fa-solid fa-list"
               style={{ marginRight: '5px', fontSize: '9px' }}
             ></i>
             View All Notifications
-          </a>
+          </Link>
         </div>
       </div>
 
