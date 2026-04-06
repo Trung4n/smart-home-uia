@@ -1,0 +1,106 @@
+/* Register-specific tweaks */
+.left-panel {
+  background-color: #111111;
+}
+
+.left-panel::before {
+  background: var(--primary);
+}
+
+.left-panel::after {
+  background: var(--accent);
+}
+
+.logo-text {
+  color: var(--white);
+}
+
+.panel-heading {
+  color: var(--white);
+}
+
+.panel-heading em {
+  color: var(--accent);
+}
+
+.step-list {
+  display: flex;
+  flex-direction: column;
+  gap: 0;
+  border: 3px solid var(--border);
+  box-shadow: var(--shadow-xl);
+  margin-bottom: 36px;
+  overflow: hidden;
+}
+
+.step-item {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 20px;
+  background: var(--white);
+  border-bottom: 3px solid var(--border);
+}
+
+.step-item:last-child {
+  border-bottom: none;
+}
+
+.step-num {
+  width: 32px;
+  height: 32px;
+  background: var(--primary);
+  border: 3px solid var(--border);
+  box-shadow: 2px 2px 0 var(--border);
+  font-family: var(--font-head);
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--white);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.step-text {
+  font-family: var(--font-head);
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--border);
+}
+
+.step-sub {
+  font-size: 11px;
+  color: #777;
+  margin-top: 1px;
+}
+
+/* Overrides for register panel heading size */
+.register-heading {
+  font-size: clamp(30px, 3vw, 44px);
+}
+
+/* Benefits list in right panel */
+.benefit-row {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin-bottom: 28px;
+}
+
+.benefit-item {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  color: #444;
+  font-weight: 500;
+}
+
+.benefit-dot {
+  width: 10px;
+  height: 10px;
+  background: var(--success);
+  border: 2px solid var(--border);
+  flex-shrink: 0;
+}

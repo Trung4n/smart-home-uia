@@ -1,6 +1,6 @@
 import './Header.css'
 import { useState, useEffect } from 'react';
-export default function Header( {page}: {page: string} ) {
+export default function Header( {page, sub = "— Overview"}: {page: string, sub?: string} ) {
   const [currentTime, setCurrentTime] = useState(new Date());
 
   useEffect(() => {
@@ -14,7 +14,7 @@ export default function Header( {page}: {page: string} ) {
   return (
     <div className="topbar">
       <span className="topbar-title">{page}</span>
-      <span className="topbar-sub">— Overview</span>
+      <span className="topbar-sub">{sub}</span>
       <div className="topbar-spacer"></div>
       <div className="topbar-clock" id="nav-clock">
         {currentTime.toLocaleTimeString()}
