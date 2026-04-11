@@ -105,13 +105,9 @@ td:last-child {
   background: #dbeafe;
   color: var(--primary);
 }
-.type-door .device-icon-sm {
+.type-servo .device-icon-sm {
   background: #d1fae5;
   color: #065f46;
-}
-.type-ac .device-icon-sm {
-  background: #e0f2fe;
-  color: #0369a1;
 }
 .type-camera .device-icon-sm {
   background: #ede9fe;
@@ -140,11 +136,8 @@ td:last-child {
 .badge-fan {
   background: #dbeafe;
 }
-.badge-door {
+.badge-servo {
   background: #d1fae5;
-}
-.badge-ac {
-  background: #e0f2fe;
 }
 .badge-camera {
   background: #ede9fe;

@@ -1,8 +1,7 @@
-import type { Device } from '../../types/device';
+import type { Device, DeviceCreate, DeviceUpdate, DeviceType } from '../../types/device';
 import { useNoti } from '../../services/NotiProvider';
+import { managementAPI } from '../../services/managementAPI';
 import type { SubmitEventHandler } from 'react';
-
-const API_URL = import.meta.env.VITE_API_URL;
 
 export default function ModalOverlay({ overlayType, setOverlayType, onDeviceDeleted }:
   {
@@ -30,26 +29,25 @@ export default function ModalOverlay({ overlayType, setOverlayType, onDeviceDele
     e.preventDefault();
     try {
       const form = new FormData(e.currentTarget);
-      const payload = {
+      const pinNumberStr = String(form.get('pin_number') || '').trim();
+      const pinNumber = parseInt(pinNumberStr);
+
+      const payload: DeviceCreate = {
         device_name: String(form.get('device_name') || '').trim(),
-        device_type: String(form.get('device_type') || 'light'),
-        pin_number: String(form.get('pin_number') || '').trim(),
+        device_type: (form.get('device_type') || 'light') as DeviceType,
+        pin_number: pinNumber,
         location: String(form.get('location') || '').trim(),
         status: String(form.get('status') || 'online'),
         is_active: String(form.get('is_active') || 'off') === 'on',
       };
 
-      if (!payload.device_name || !payload.pin_number || !payload.location) {
+      if (!payload.device_name || !pinNumberStr || isNaN(pinNumber) || !payload.location) {
         setNotification('Please fill all required fields.');
         return;
       }
 
-      const response = await fetch(`${API_URL}/devices/`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error('Failed to add device');
+      const newDevice = await managementAPI.create(payload);
+      if (!newDevice) throw new Error('Failed to add device');
       setNotification('Device added successfully.');
       closeOverlay();
     } catch (error) {
@@ -62,27 +60,27 @@ export default function ModalOverlay({ overlayType, setOverlayType, onDeviceDele
     e.preventDefault();
     try {
       const form = new FormData(e.currentTarget);
-      const payload = {
-        device_id: overlayType.device?.device_id,
+      const pinNumberStr = String(form.get('pin_number') || '').trim();
+      const pinNumber = parseInt(pinNumberStr);
+
+      const payload: DeviceUpdate = {
         device_name: String(form.get('device_name') || '').trim(),
-        device_type: String(form.get('device_type') || 'light'),
-        pin_number: String(form.get('pin_number') || '').trim(),
+        device_type: (form.get('device_type') || 'light') as DeviceType,
+        pin_number: pinNumber,
+        device_mode: overlayType.device?.device_mode || 'auto',
         location: String(form.get('location') || '').trim(),
         status: String(form.get('status') || 'online'),
         is_active: String(form.get('is_active') || 'off') === 'on',
       };
       console.log('Edit device payload:', payload);
-      if (!payload.device_name || !payload.pin_number || !payload.location) {
+      if (!payload.device_name || !pinNumberStr || isNaN(pinNumber) || !payload.location) {
         setNotification('Please fill all required fields.');
         return;
       }
 
-      const response = await fetch(`${API_URL}/devices/${overlayType.device?.device_id}`, {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!response.ok) throw new Error('Failed to update device');
+      const updatedDevice = await managementAPI.update(overlayType.device?.device_id!, payload);
+      console.log('Edit device response:', overlayType.device?.device_id);
+      if (!updatedDevice) throw new Error('Failed to update device');
       setNotification('Device updated successfully.');
       closeOverlay();
     } catch (error) {
@@ -99,10 +97,8 @@ export default function ModalOverlay({ overlayType, setOverlayType, onDeviceDele
         return;
       }
 
-      const response = await fetch(`${API_URL}/devices/${overlayType.device?.device_id}`, {
-        method: 'DELETE',
-      });
-      if (response.ok) {
+      const success = await managementAPI.delete(deviceId);
+      if (success) {
         setNotification('Device deleted successfully.');
         onDeviceDeleted?.(deviceId);
         closeOverlay();
@@ -203,10 +199,10 @@ export default function ModalOverlay({ overlayType, setOverlayType, onDeviceDele
                   <select className="form-select" id="f-dev-type" name="device_type">
                     <option value="light">Light</option>
                     <option value="fan">Fan</option>
-                    <option value="door">Door</option>
-                    <option value="ac">AC</option>
+                    <option value="servo">Servo</option>
                     <option value="camera">Camera</option>
                     <option value="sensor">Sensor</option>
+                    <option value="other">Other</option>
                   </select>
                 </div>
               </div>
@@ -218,7 +214,7 @@ export default function ModalOverlay({ overlayType, setOverlayType, onDeviceDele
                     className="form-input"
                     id="f-dev-gpio"
                     name="pin_number"
-                    placeholder="e.g. GPIO18"
+                    placeholder="e.g. 10"
                   />
                 </div>
                 <div className="form-field">
@@ -288,14 +284,18 @@ export default function ModalOverlay({ overlayType, setOverlayType, onDeviceDele
                 </div>
                 <div className="form-field">
                   <label className="form-label">Device Type</label>
-                  <select className="form-select" id="f-dev-type" name="device_type" defaultValue={device?.device_type || 'light'}>
-                    <option value="light">Light</option>
-                    <option value="fan">Fan</option>
-                    <option value="door">Door</option>
-                    <option value="ac">AC</option>
-                    <option value="camera">Camera</option>
-                    <option value="sensor">Sensor</option>
-                  </select>
+                  {
+                    device?.device_type && (
+                      <select className="form-select" id="f-dev-type" name="device_type" defaultValue={device?.device_type || 'light'}>
+                        <option value="light">Light</option>
+                        <option value="fan">Fan</option>
+                        <option value="servo">Servo</option>
+                        <option value="camera">Camera</option>
+                        <option value="sensor">Sensor</option>
+                        <option value="other">Other</option>
+                      </select>
+                    )
+                  }
                 </div>
               </div>
               <div className="form-row">

@@ -29,7 +29,7 @@ export default function MainManagement() {
         <button onClick={() => setActiveTab('devices')} className={activeTab === 'devices' ? 'tab-btn active' : 'tab-btn'} data-tab="devices">
           <i className="fa-solid fa-sliders"></i>
           Devices
-          <span className="tab-badge" id="tab-badge-devices">7</span>
+          <span className="tab-badge" id="tab-badge-devices">{managedDevices.length}</span>
         </button>
         <button onClick={() => setActiveTab('syslog')} className={activeTab === 'syslog' ? 'tab-btn active' : 'tab-btn'} data-tab="syslog">
           <i className="fa-solid fa-terminal"></i>

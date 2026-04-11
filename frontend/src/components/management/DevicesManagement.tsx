@@ -9,10 +9,9 @@ export default function DevicesManagement({ devices, setOverlayType }: { devices
   const icon = {
     light: 'fa-lightbulb',
     fan: 'fa-fan',
-    ac: 'fa-snowflake',
-    door: 'fa-door-closed',
+    sensor: 'fa-microchip',
     camera: 'fa-video',
-    sensor: 'fa-microchip'
+    servo: 'fa-door-closed',
   } as const;
 
 
@@ -68,11 +67,8 @@ export default function DevicesManagement({ devices, setOverlayType }: { devices
         <button onClick={() => setFilterType('fan')} className={`filter-btn ${filterType === 'fan' ? 'active' : ''}`} data-dtype="fan">
           <i className="fa-solid fa-fan"></i> Fan
         </button>
-        <button onClick={() => setFilterType('door')} className={`filter-btn ${filterType === 'door' ? 'active' : ''}`} data-dtype="door">
-          <i className="fa-solid fa-door-closed"></i> Door
-        </button>
-        <button onClick={() => setFilterType('ac')} className={`filter-btn ${filterType === 'ac' ? 'active' : ''}`} data-dtype="ac">
-          <i className="fa-solid fa-snowflake"></i> AC
+        <button onClick={() => setFilterType('servo')} className={`filter-btn ${filterType === 'servo' ? 'active' : ''}`} data-dtype="servo">
+          <i className="fa-solid fa-door-closed"></i> Servo
         </button>
         <button onClick={() => setFilterType('camera')} className={`filter-btn ${filterType === 'camera' ? 'active' : ''}`} data-dtype="camera">
           <i className="fa-solid fa-video"></i> Camera
