@@ -1,7 +1,27 @@
+export type DeviceType = 'light' | 'servo' | 'fan' | 'camera' | 'sensor' | 'other';
 export interface Device {
   device_id: number;
   device_name: string;
-  device_type: string;
+  device_type: DeviceType;
+  pin_number: number;
+  location: string;
+  device_mode: string;
+  status: string;
+  is_active: boolean;
+}
+
+export interface DeviceCreate {
+  device_name: string;
+  device_type: DeviceType;
+  pin_number: number;
+  location: string;
+  status: string;
+  is_active: boolean;
+}
+
+export interface DeviceUpdate {
+  device_name: string;
+  device_type: DeviceType;
   pin_number: number;
   location: string;
   device_mode: string;
