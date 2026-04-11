@@ -1,5 +1,5 @@
 import './GoogleButton.css'
-export default function GoogleButton({ isLoading, onClick }: { isLoading: boolean; onClick: () => void }) {
+export default function GoogleButton({ isLoading, onClick, isRegister = false }: { isLoading: boolean; onClick: () => void; isRegister?: boolean }) {
   return (
     <div className="anim-slide-up delay-3">
       <button id="btn-google" className={`btn-google ${isLoading ? 'loading' : ''}`} type="button" onClick={onClick}>
@@ -29,7 +29,7 @@ export default function GoogleButton({ isLoading, onClick }: { isLoading: boolea
         {isLoading ? (
           <span className="btn-label">Redirecting...</span>
         ) : (
-          <span className="btn-label">Continue with Google</span>
+          <span className="btn-label">{isRegister ? "Sign up" : "Continue"} with Google</span>
         )}
       </button>
     </div>
