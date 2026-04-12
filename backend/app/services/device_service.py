@@ -16,9 +16,9 @@ class DeviceService:
         return device
 
     def create(self, payload: DeviceCreate) -> dict:
-        existing = self.repo.get_by_name(payload.name)
+        existing = self.repo.get_by_name(payload.device_name)
         if existing:
-            raise DuplicateDeviceException(payload.name)
+            raise DuplicateDeviceException(payload.device_name)
         return self.repo.create(payload.model_dump())
 
     def update(self, device_id: int, payload: DeviceUpdate) -> dict:

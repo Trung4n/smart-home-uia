@@ -1,5 +1,6 @@
 from pydantic import BaseModel
 from typing import Optional
+from datetime import datetime
 from app.core.enums import TriggerTypeEnum, ConditionOperatorEnum, ActionEnum
 
 class AutomationRuleCreate(BaseModel):
@@ -9,11 +10,10 @@ class AutomationRuleCreate(BaseModel):
     trigger_type: TriggerTypeEnum
     condition_operator: Optional[ConditionOperatorEnum]
     condition_value: Optional[float] 
-    schedule_time: Optional[str] 
+    schedule_time: Optional[datetime] = None
     repeat_days: Optional[str] 
     action: ActionEnum
     is_active: Optional[bool] = True
-
 
 class AutomationRuleUpdate(BaseModel):
     device_id: Optional[int]
@@ -22,7 +22,7 @@ class AutomationRuleUpdate(BaseModel):
     trigger_type: Optional[TriggerTypeEnum]
     condition_operator: Optional[ConditionOperatorEnum] 
     condition_value: Optional[float] 
-    schedule_time: Optional[str] 
+    schedule_time: Optional[datetime] = None
     repeat_days: Optional[str] 
     action: Optional[ActionEnum] 
     is_active: Optional[bool]
@@ -36,7 +36,7 @@ class AutomationRuleResponse(BaseModel):
     trigger_type: TriggerTypeEnum
     condition_operator: Optional[ConditionOperatorEnum] 
     condition_value: Optional[float] 
-    schedule_time: Optional[str] 
+    schedule_time: Optional[datetime] = None
     repeat_days: Optional[str] 
     action: ActionEnum
     is_active: bool
