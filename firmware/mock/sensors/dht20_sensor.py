@@ -1,11 +1,11 @@
+# dht20_sensor.py
 import random
 import math
 import time
 
 class DHT20Sensor:
-    def __init__(self, device_id: str, location: str):
+    def __init__(self, device_id: str):
         self.device_id = device_id
-        self.location = location
         self.sensor_type = "DHT20"
 
         self._temp = random.uniform(24.0, 28.0)
@@ -42,13 +42,19 @@ class DHT20Sensor:
 
         return {
             "device_id": self.device_id,
-            "location": self.location,
             "sensor": self.sensor_type,
             "temperature_c": round(temp, 2),
             "humidity_pct": round(humidity, 2),
             "heat_index_c": round(heat_index, 2),
             "comfort": comfort,
             "timestamp": time.time(),
+        }
+
+    def read_flat(self) -> dict:
+        data = self.read()
+        return {
+            "temp": data["temperature_c"],
+            "humi": data["humidity_pct"],
         }
 
     def _heat_index(self, T: float, RH: float) -> float:

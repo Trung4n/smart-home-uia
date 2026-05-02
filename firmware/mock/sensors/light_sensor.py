@@ -1,12 +1,12 @@
+# light_sensor.py
 import random
 import math
 import time
 
 
 class LightSensor:
-    def __init__(self, device_id: str, location: str):
+    def __init__(self, device_id: str):
         self.device_id = device_id
-        self.location = location
         self.sensor_type = "LDR"
 
     def _simulate_daylight_cycle(self) -> float:
@@ -27,11 +27,16 @@ class LightSensor:
 
         return {
             "device_id": self.device_id,
-            "location": self.location,
             "sensor": self.sensor_type,
             "lux": lux,
             "condition": condition,
             "timestamp": time.time(),
+        }
+    
+    def read_flat(self) -> dict:
+        data = self.read()
+        return {
+            "light": data["lux"],
         }
 
     def _classify(self, lux: float) -> str:
