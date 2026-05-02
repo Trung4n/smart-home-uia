@@ -7,7 +7,7 @@ services:
       - "1883:1883" # MQTT TCP  -> firmware / backend
       - "9001:9001" # WebSocket -> frontend browser
     volumes:
-      - ./config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./config:/mosquitto/config
       - ./data:/mosquitto/data
       - ./log:/mosquitto/log
     healthcheck:
