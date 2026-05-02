@@ -24,18 +24,17 @@ class BaseRepository:
         return obj
     
     def _execute(self, query) -> Any:
-        import traceback
         try:
             return query.execute()
         except Exception as e:
             logger.error(
-            f"DB Error on {self.table_name}: {str(e)}",
-            exc_info=True  # ← Giữ full traceback
-        )
-        raise DatabaseException(
-            f"Database operation failed on {self.table_name}",
-            original_error=str(e)
-        ) from e 
+                f"DB Error on {self.table_name}: {str(e)}",
+                exc_info=True
+            )
+            raise DatabaseException(
+                f"Database operation failed on {self.table_name}",
+                original_error=str(e)
+            ) from e
 
     def get_all(self) -> list:
         res = self._execute(self._table().select("*"))

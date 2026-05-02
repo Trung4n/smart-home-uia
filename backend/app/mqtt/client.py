@@ -5,17 +5,25 @@ from typing import Any, Optional
 import paho.mqtt.client as mqtt
 
 from app.utils.logger import get_logger
-from app.websocket.manager import WebSocketManager
-
+from app.websocket.system_manager import SystemWebSocketManager
+from app.services.notification_service import NotificationService
+from app.services.sensor_log_service import SensorLogService
+from app.core.enums import *
+from app.schemas.notification import NotificationCreate
+from app.schemas.sensor_log import SensorLogCreate
 logger = get_logger(__name__)
 
 
 class MQTTGateway:
-    def __init__(self, ws_manager: WebSocketManager) -> None:
+    def __init__(self, system_manager: SystemWebSocketManager, notification: NotificationService, sensor_log: SensorLogService) -> None:
         self.client: mqtt.Client = mqtt.Client(mqtt.CallbackAPIVersion.VERSION2)
         self.loop: Optional[asyncio.AbstractEventLoop] = None
-        self.ws_manager: WebSocketManager = ws_manager
+        self.system_manager: SystemWebSocketManager = system_manager
+        self.notification: NotificationService = notification
+        self.sensor_log: SensorLogService = sensor_log
 
+    def set_engine(self, engine: Any) -> None:
+        self.engine = engine
     def _on_connect(
         self,
         client: mqtt.Client,
@@ -28,6 +36,17 @@ class MQTTGateway:
             logger.info("Connected to MQTT Broker successfully.")
 
             client.subscribe("iot-json", qos=1)
+
+            self.notification.create(NotificationCreate(
+                title="System Back Online",
+                description=(
+                    "Connection to your smart home devices has been successfully restored. "
+                    "All systems are now operating normally."
+                ),
+                notification_type=NotificationTypeEnum.SYSTEM,
+                severity=SeverityEnum.LOW
+            ))
+
             logger.info("Subscribed to 'iot-json' topic")
         else:
             logger.error(f"Failed to connect, return code: {reason_code}")
@@ -42,6 +61,15 @@ class MQTTGateway:
     ) -> None:
         """Handle MQTT disconnection."""
         if reason_code != 0:
+            self.notification.create(NotificationCreate(
+                title="Connection Lost",
+                description=(
+                    "Your smart home system has temporarily lost connection to IoT devices. "
+                    "Real-time updates and automation may be delayed until the connection is restored."
+                ),
+                notification_type=NotificationTypeEnum.SYSTEM,
+                severity=SeverityEnum.HIGH
+            ))
             logger.warning(f"Unexpected disconnect (code={reason_code}). Auto-reconnect in progress...")
         else:
             logger.info("MQTT client disconnected cleanly")
@@ -60,6 +88,14 @@ class MQTTGateway:
                 f"humi={data['humi']}%  "
                 f"light={data['light']} lux"
             )
+
+            for key in ["temp", "humi", "light"]:
+                if key in data:
+                    _, sensor = self.sensor_log.create(SensorLogCreate(
+                        key=key,
+                        value=data[key]
+                    ))
+                    self.engine.sensor_rule(sensor["sensor_id"], data[key])
 
             success: bool = self._push_to_ws(data)
 
@@ -86,7 +122,7 @@ class MQTTGateway:
             return False
 
         try:
-            asyncio.run_coroutine_threadsafe(self.ws_manager.broadcast(data), self.loop)
+            asyncio.run_coroutine_threadsafe(self.system_manager.broadcast(data), self.loop)
             return True
 
         except asyncio.TimeoutError:
@@ -97,6 +133,20 @@ class MQTTGateway:
         except Exception as e:
             logger.error(
                 f"Failed to push message: {type(e).__name__}: {e}", exc_info=True)
+            return False
+    
+    def send_command(self, command: dict) -> bool:
+        try:
+            payload = json.dumps(command)
+            result = self.client.publish("iot-control", payload, qos=1)
+            if result.rc == mqtt.MQTT_ERR_SUCCESS:
+                logger.info(f"[iot-control] Sent command: {command}")
+                return True
+            else:
+                logger.error(f"[iot-control] Publish failed, rc={result.rc}")
+                return False
+        except Exception as e:
+            logger.error(f"[iot-control] Error sending command: {e}", exc_info=True)
             return False
 
     def start(

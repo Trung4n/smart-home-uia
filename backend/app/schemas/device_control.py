@@ -3,6 +3,7 @@ from typing import Optional
 from app.core.enums import ActionEnum, SourceEnum
 class DeviceControlCreate(BaseModel):
     device_id: int
+    device_name: Optional[str]  # for MQTT command, not stored in DB
     action: ActionEnum
     value: Optional[str]
     source: SourceEnum

@@ -11,8 +11,6 @@ from app.core.exception_handlers import app_exception_handler
 
 from app.api.router import api_router
 from app.core.container import Container
-from app.mqtt.client import MQTTGateway
-from app.websocket.manager import WebSocketManager
 from app.utils.logger import get_logger
 
 logger = get_logger(__name__)
@@ -23,12 +21,15 @@ container = Container()
 async def lifespan(app: FastAPI):
     try:
         container.init_resources()
-        container.wire(packages=["app.api.endpoints", "app.mqtt.client"])
+        container.wire(packages=["app.api.endpoints", "app.mqtt.client", "app.core.scheduler"])
 
         loop = asyncio.get_event_loop()
         
         mqtt = container.mqtt_gateway()
+        scheduler = container.scheduler()
 
+        scheduler.start()
+        mqtt.set_engine(container.automation_engine())
         mqtt.start(settings.MQTT_BROKER,
                    settings.MQTT_PORT,
                    settings.MQTT_USER,
@@ -37,6 +38,7 @@ async def lifespan(app: FastAPI):
         yield
 
         mqtt.stop()
+        scheduler.stop()
 
     except Exception as e:
         logger.error(f"Startup error: {e}")

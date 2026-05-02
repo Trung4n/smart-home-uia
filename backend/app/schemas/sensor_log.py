@@ -1,4 +1,8 @@
 from pydantic import BaseModel
+import datetime
+class SensorLogCreate(BaseModel):
+    key: str
+    value: float
 
 class SensorLogResponse(BaseModel):
     sensor_log_id: int
