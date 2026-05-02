@@ -1,7 +1,7 @@
 # from app.schemas.sensor import SensorCreate
 from app.repositories import SensorRepository
 from app.core.exceptions import *
-
+from app.core.enums import SensorTypeEnum
 class SensorService:
     def __init__(self, repo: SensorRepository):
         self.repo = repo
@@ -10,6 +10,12 @@ class SensorService:
         sensor = self.repo.get_by_id(sensor_id)
         if not sensor:
             raise SensorNotFoundException(sensor_id)  # domain exception
+        return sensor
+    
+    def get_by_sensor_type(self, sensor_type: SensorTypeEnum) -> dict:
+        sensor = self.repo.get_by_sensor_type(sensor_type)
+        if not sensor:
+            raise SensorNotFoundException(f"Sensor not found for type: {sensor_type}")
         return sensor
     
     def get_all(self) -> list:

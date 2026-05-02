@@ -52,3 +52,11 @@ class ExpiredTokenException(ValidationException):
 class DatabaseException(AppException):
     def __init__(self, message: str = "Database error"):
         super().__init__(message, status_code=500)
+
+class ConflictException(AppException):
+    def __init__(self, message: str = "Conflict"):
+        super().__init__(message, status_code=409)
+
+class DeviceStateChangeNotAllowedException(ConflictException):
+    def __init__(self, device_id: int):
+        super().__init__(f"Device {device_id} cannot be changed")

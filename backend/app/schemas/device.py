@@ -11,13 +11,13 @@ class DeviceCreate(BaseModel):
     is_active: Optional[bool] = True
 
 class DeviceUpdate(BaseModel):
-    device_name: Optional[str]
-    device_type: Optional[DeviceTypeEnum]
-    pin_number: Optional[int]
-    location: Optional[str]
-    device_mode: Optional[DeviceModeEnum]
-    status: Optional[str]
-    is_active: Optional[bool]
+    device_name: Optional[str] = None
+    device_type: Optional[DeviceTypeEnum] = None
+    pin_number: Optional[int] = None
+    location: Optional[str] = None
+    device_mode: Optional[DeviceModeEnum] = None
+    status: Optional[str] = None
+    is_active: Optional[bool] = None
 
 class DeviceResponse(BaseModel):
     device_id: int
