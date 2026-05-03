@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import axios from "axios";
 import { getSensorStatus, useThreshold } from "../../hooks/useSensorStatus";
-import type { DHT20Data, LightData } from "../../types/device";
 import "./environment.css";
 import EnvSensorCard from "./EnvSensorCard";
 import HistoryChartPanel, {
@@ -43,13 +42,6 @@ const SENSOR_TYPE_TO_KEY: Partial<Record<SensorRecord["sensor_type"], SensorKey>
   light: "light",
 };
 
-function normalizeTimestamp(timestamp?: number) {
-  if (!timestamp) {
-    return Date.now();
-  }
-
-  return timestamp < 1_000_000_000_000 ? timestamp * 1000 : timestamp;
-}
 
 function isSameDay(timestamp: number, now: Date) {
   const date = new Date(timestamp);
@@ -65,9 +57,9 @@ export default function MainEnvironment({
   humidityData,
   lightData,
 }: {
-  tempData: DHT20Data | null;
-  humidityData: DHT20Data | null;
-  lightData: LightData | null;
+  tempData: number | undefined;
+  humidityData: number | undefined;
+  lightData: number | undefined;
 }) {
   const thresholds = useThreshold();
   const [activeSensor, setActiveSensor] = useState<SensorKey>("temp");
@@ -130,17 +122,17 @@ export default function MainEnvironment({
   const tempStatus = getSensorStatus(
     thresholds,
     sensorInfoByKey.temp.sensorId ?? SENSOR_ID_FALLBACK.temp,
-    tempData?.temperature_c,
+    tempData,
   );
   const humStatus = getSensorStatus(
     thresholds,
     sensorInfoByKey.hum.sensorId ?? SENSOR_ID_FALLBACK.hum,
-    humidityData?.humidity_pct,
+    humidityData,
   );
   const lightStatus = getSensorStatus(
     thresholds,
     sensorInfoByKey.light.sensorId ?? SENSOR_ID_FALLBACK.light,
-    lightData?.lux,
+    lightData,
   );
 
   useEffect(() => {
@@ -214,21 +206,22 @@ export default function MainEnvironment({
   }, []);
 
   useEffect(() => {
-    const updates: Array<{ key: SensorKey; value: number | undefined; timestamp?: number }> = [
+    const now = Date.now();
+    const updates: Array<{ key: SensorKey; value: number | undefined; timestamp: number }> = [
       {
         key: "temp",
-        value: tempData?.temperature_c,
-        timestamp: tempData?.timestamp,
+        value: tempData,
+        timestamp: now,
       },
       {
         key: "hum",
-        value: humidityData?.humidity_pct,
-        timestamp: humidityData?.timestamp,
+        value: humidityData,
+        timestamp: now,
       },
       {
         key: "light",
-        value: lightData?.lux,
-        timestamp: lightData?.timestamp,
+        value: lightData,
+        timestamp: now,
       },
     ];
 
@@ -239,14 +232,13 @@ export default function MainEnvironment({
         return;
       }
 
-      const normalized = normalizeTimestamp(update.timestamp);
-      if (normalized <= lastLiveTimestampRef.current[update.key]) {
+      if (update.timestamp <= lastLiveTimestampRef.current[update.key]) {
         return;
       }
 
-      lastLiveTimestampRef.current[update.key] = normalized;
+      lastLiveTimestampRef.current[update.key] = update.timestamp;
       nextEntries[update.key] = {
-        t: normalized,
+        t: update.timestamp,
         v: update.value,
       };
     });
@@ -277,14 +269,7 @@ export default function MainEnvironment({
 
       return next;
     });
-  }, [
-    humidityData?.humidity_pct,
-    humidityData?.timestamp,
-    lightData?.lux,
-    lightData?.timestamp,
-    tempData?.temperature_c,
-    tempData?.timestamp,
-  ]);
+  }, [humidityData, lightData, tempData]);
 
   const sensorStats = useMemo(() => {
     const now = new Date();
@@ -325,7 +310,7 @@ export default function MainEnvironment({
           status={tempStatus}
           themeClass="temp-card"
           unit="°C"
-          value={tempData?.temperature_c}
+          value={tempData}
         />
 
         <EnvSensorCard
@@ -339,7 +324,7 @@ export default function MainEnvironment({
           status={humStatus}
           themeClass="hum-card"
           unit="%"
-          value={humidityData?.humidity_pct}
+          value={humidityData}
         />
 
         <EnvSensorCard
@@ -353,7 +338,7 @@ export default function MainEnvironment({
           status={lightStatus}
           themeClass="light-card"
           unit="lux"
-          value={lightData?.lux?.toFixed(0)}
+          value={lightData?.toFixed(0)}
         />
       </div>
 

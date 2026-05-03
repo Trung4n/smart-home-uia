@@ -1,7 +1,7 @@
 // Unfinished for now
 import './MainDashboard.css'
 import { Link } from 'react-router';
-import { type LightData, type DHT20Data } from '../../types/device';
+import { type LiveSensorData} from '../../types/device';
 import { useWS } from '../../hooks/useWebSocket';
 import { useAlerts } from '../../hooks/useAlert';
 import { useDevices } from '../../hooks/useDevices';
@@ -10,13 +10,11 @@ import DeviceItem from './DeviceItem';
 import SensorCard from './LiveSensor';
 import AlertItem from './AlertItem';
 export default function MainDashboard() {
-  const tempData = useWS<DHT20Data>('/5');
-  const humidityData = useWS<DHT20Data>('/5');
-  const lightData = useWS<LightData>('/3');
+  const sensorData = useWS<LiveSensorData>('/system');
   const thresholds = useThreshold();
-  const tempStatus = getSensorStatus(thresholds, 1, tempData?.temperature_c);
-  const humStatus = getSensorStatus(thresholds, 2, humidityData?.humidity_pct);
-  const lightStatus = getSensorStatus(thresholds, 3, lightData?.lux);
+  const lightStatus = getSensorStatus(thresholds, 1, sensorData?.light);
+  const tempStatus = getSensorStatus(thresholds, 2, sensorData?.temp);
+  const humStatus = getSensorStatus(thresholds, 3, sensorData?.humi);
   const devices = useDevices();
   const alerts = useAlerts();
   return (
@@ -31,7 +29,7 @@ export default function MainDashboard() {
           <SensorCard
             icon="fa-temperature-half"
             label="Temperature"
-            value={tempData?.temperature_c}
+            value={sensorData?.temp}
             unit="°C"
             status={tempStatus}
           />
@@ -39,7 +37,7 @@ export default function MainDashboard() {
           <SensorCard
             icon="fa-droplet"
             label="Humidity"
-            value={humidityData?.humidity_pct}
+            value={sensorData?.humi}
             unit="%"
             status={humStatus}
           />
@@ -47,7 +45,7 @@ export default function MainDashboard() {
           <SensorCard
             icon="fa-sun"
             label="Light Level"
-            value={lightData?.lux.toFixed(0)}
+            value={sensorData?.light}
             unit="lux"
             status={lightStatus}
           />
@@ -87,11 +85,11 @@ export default function MainDashboard() {
           </div>
 
           <div className='notif-list'>
-            {alerts.slice(0, 8).map((alert) => (
+            {alerts.slice(-8).map((alert) => (
               <AlertItem
                 key={alert.notification_id}
                 type={alert.notification_type}
-                msg={alert.description}
+                msg={alert.title}
                 time={alert.created_at}
               />
             ))}
