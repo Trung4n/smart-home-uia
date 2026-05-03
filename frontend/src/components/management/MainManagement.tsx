@@ -7,7 +7,7 @@ import LogManagement from './LogManagement';
 import ModalOverlay from './ModalOverlay';
 import type { Device } from '../../types/device';
 export default function MainManagement() {
-  const devices = useDevices();
+  const [devices] = useDevices();
   const [managedDevices, setManagedDevices] = useState<Device[]>([]);
   const [activeTab, setActiveTab] = useState<string>('devices');
   const [overlayType, setOverlayType] = useState<{type: string, device?: Device}>({type: '', device: {} as Device});

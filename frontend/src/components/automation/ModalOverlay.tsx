@@ -90,7 +90,7 @@ export default function ModalOverlay({
   onSaveRule: (payload: AutomationRuleCreate | AutomationRuleUpdate) => Promise<void>,
   onDeleteRule: () => Promise<void>,
 }) {
-  const devices = useDevices();
+  const [devices] = useDevices();
   const [form, setForm] = useState<RuleFormState>(DEFAULT_RULE);
   const [selectedDays, setSelectedDays] = useState<string[]>(['Mon', 'Tue', 'Wed', 'Thu', 'Fri']);
   const [isSubmitting, setIsSubmitting] = useState(false);

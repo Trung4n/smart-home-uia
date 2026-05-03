@@ -657,6 +657,51 @@ body {
   box-shadow: var(--shadow-sm);
 }
 
+.page-jump-group {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.page-jump-label {
+  font-family: var(--font-head);
+  font-size: 10px;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 1px;
+  color: var(--muted);
+  white-space: nowrap;
+}
+
+.page-jump-input {
+  width: 72px;
+  height: 32px;
+  border: 2.5px solid var(--border);
+  background: var(--bg2);
+  box-shadow: var(--shadow-sm);
+  font-family: var(--font-head);
+  font-size: 11px;
+  font-weight: 700;
+  text-align: center;
+  color: var(--border);
+  outline: none;
+}
+
+.page-jump-input:focus {
+  background: var(--white);
+  box-shadow: var(--shadow);
+}
+
+.page-jump-input:disabled {
+  opacity: 0.45;
+  cursor: not-allowed;
+}
+
+.page-jump-btn {
+  width: auto;
+  padding: 0 12px;
+}
+
 .page-ellipsis {
   font-family: var(--font-head);
   font-size: 12px;

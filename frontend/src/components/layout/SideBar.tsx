@@ -2,6 +2,8 @@ import "./SideBar.css";
 import { useAuth } from "../../services/AuthProvider";
 import { useState, useRef, useEffect } from "react";
 import { Link, useLocation } from "react-router-dom";
+import type { Alert } from '../../types/alert';
+const API_URL = import.meta.env.VITE_API_URL;
 const USER_ITEMS = [
   {
     id: "dashboard",
@@ -67,9 +69,21 @@ export default function SideBar({
   const dropdownRef = useRef<HTMLDivElement>(null);
   const profileRef = useRef<HTMLDivElement>(null);
   const avatarUrl = user?.user_metadata?.picture;
+  const [unreadCount, setUnreadCount] = useState<number>(0);
   useEffect(() => {
     const path = location.pathname.split('/')[1] || 'dashboard';
     setActiveItem(path);
+    const getUnreadCount = async () => {
+      try {
+        const response = await fetch(`${API_URL}/notifications`);
+        const data: Alert[] = await response.json();
+        const count = data.filter(alert => !alert.is_read).length;
+        setUnreadCount(count);
+      } catch (error) {
+        console.error('Error fetching unread count:', error);
+      }
+    };
+    getUnreadCount();
   }, [location.pathname]);
   useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -115,7 +129,7 @@ export default function SideBar({
               <i className={item.icon}></i>
             </div>
             <span className="sb-item-label">{item.label}</span>
-            {item.badge && <span className="sb-badge">3</span>}
+            {item.badge && <span className="sb-badge">{unreadCount}</span>}
           </Link>
         ))}
         <div className="sb-section-label">Admin</div>

@@ -1,3 +1,4 @@
+import { useEffect, useState } from "react";
 import "./notifications.css";
 import type { Alert } from "../../types/alert";
 
@@ -53,6 +54,18 @@ export default function MainNotifications({
   isSaving,
   deviceNames,
 }: MainNotificationsProps) {
+  const [pageInput, setPageInput] = useState(String(currentPage));
+
+  useEffect(() => {
+    setPageInput(String(currentPage));
+  }, [currentPage]);
+
+  const handleJumpToPage = () => {
+    const nextPage = Number.parseInt(pageInput, 10);
+    if (Number.isNaN(nextPage)) return;
+    onPageChange(nextPage);
+  };
+
   return (
     <div className="notif-layout">
       <div className={`bulk-bar ${bulkActive ? "visible" : ""}`}>
@@ -164,18 +177,27 @@ export default function MainNotifications({
           <i className="fa-solid fa-chevron-left"></i>
         </button>
 
-        <div id="page-btns">
-          {Array.from({ length: pageCount }, (_, index) => (
-            <button
-              key={index + 1}
-              type="button"
-              className={`page-btn ${currentPage === index + 1 ? "active" : ""}`}
-              onClick={() => onPageChange(index + 1)}
-            >
-              {index + 1}
-            </button>
-          ))}
+        <div className="page-jump-group">
+          <input
+            id="notification-page-input"
+            className="page-jump-input"
+            type="number"
+            min={1}
+            max={pageCount}
+            value={pageInput}
+            onChange={(event) => setPageInput(event.target.value)}
+            onKeyDown={(event) => {
+              if (event.key === "Enter") {
+                event.preventDefault();
+                handleJumpToPage();
+              }
+            }}
+            disabled={pageCount <= 1}
+            aria-label="Jump to page"
+          />
         </div>
+
+
 
         <button className="page-btn" type="button" onClick={onNextPage} disabled={currentPage >= pageCount}>
           <i className="fa-solid fa-chevron-right"></i>

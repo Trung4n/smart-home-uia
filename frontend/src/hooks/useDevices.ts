@@ -15,5 +15,5 @@ export function useDevices() {
     };
     fetchDevices();
   }, [])
-  return devices;
+  return [devices, setDevices] as const;
 }

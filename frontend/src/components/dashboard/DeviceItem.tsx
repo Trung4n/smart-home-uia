@@ -4,7 +4,7 @@ import { useNoti } from '../../services/NotiProvider';
 import type { Device } from '../../types/device';
 const API_URL = import.meta.env.VITE_API_URL;
 
-export default function DeviceItem({ device }: { device: Device }) {
+export default function DeviceItem({ device, setDevices }: { device: Device; setDevices: React.Dispatch<React.SetStateAction<Device[]>> }) {
   const { setNotification } = useNoti();
   const [isDeviceOn, setIsDeviceOn] = useState(device.is_active);
 
@@ -34,12 +34,13 @@ export default function DeviceItem({ device }: { device: Device }) {
       if (!response.ok) {
         throw new Error('Failed to update device status');
       }
+      setIsDeviceOn((prev) => !prev);
+      setNotification('Device toggled successfully');
+      setDevices((prev) => prev.map(d => d.device_id === device.device_id ? { ...d, is_active: !isDeviceOn } : d));
     } catch (error) {
       console.error('Error toggling device:', error);
       setNotification('Failed to toggle device');
     }
-    setIsDeviceOn((prev) => !prev);
-    setNotification('Device toggled successfully');
     return;
   }
   return (

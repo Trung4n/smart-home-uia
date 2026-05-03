@@ -8,6 +8,7 @@ services:
       - "9001:9001" # WebSocket -> frontend browser
     volumes:
       - ./mqtt-broker/config/mosquitto.conf:/mosquitto/config/mosquitto.conf:ro
+      - ./mqtt-broker/config/passwd:/mosquitto/config/passwd:ro
       - ./mqtt-broker/data:/mosquitto/data
       - ./mqtt-broker/log:/mosquitto/log
   be:
