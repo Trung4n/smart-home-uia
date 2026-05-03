@@ -1,17 +1,15 @@
 import MainEnvironment from "../components/environment/MainEnvironment";
 import OverviewBar from "../components/environment/OverviewBar";
 import { useWS } from "../hooks/useWebSocket";
-import type { DHT20Data, LightData } from "../types/device";
+import type { LiveSensorData } from "../types/device";
 
 export default function Environment() {
-    const tempData = useWS<DHT20Data>('/5');
-    const humidityData = useWS<DHT20Data>('/5');
-    const lightData = useWS<LightData>('/3');
+    const sensorData = useWS<LiveSensorData>('/system');
 
     return (
         <>
-            <OverviewBar tempData={tempData} humidityData={humidityData} lightData={lightData} />
-            <MainEnvironment tempData={tempData} humidityData={humidityData} lightData={lightData} />
+            <OverviewBar tempData={sensorData?.temp} humidityData={sensorData?.humi} lightData={sensorData?.light} />
+            <MainEnvironment tempData={sensorData?.temp} humidityData={sensorData?.humi} lightData={sensorData?.light} />
         </>
     );
 }

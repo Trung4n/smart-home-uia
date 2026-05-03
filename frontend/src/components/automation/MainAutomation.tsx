@@ -1,4 +1,4 @@
-import { useEffect, useState } from 'react';
+import { useMemo, useState } from 'react';
 import { useAutomationRules } from '../../hooks/useAutomationRules';
 import './MainAutomation.css'
 import SummaryRow from './SummaryRow'
@@ -7,11 +7,29 @@ import ModalOverlay from './ModalOverlay';
 import type { AutomationRule, AutomationRuleCreate, AutomationRuleUpdate } from '../../types/automation';
 export default function MainAutomation() {
   const rules = useAutomationRules();
-  const [displayedRules, setDisplayedRules] = useState(rules.rules);
   const [searchTerm, setSearchTerm] = useState<string>('');
   const [filterType, setFilterType] = useState<string>('all'); // 'all', 'sensor', 'schedule'
   const [filterStatus, setFilterStatus] = useState<string>('all'); // 'all', 'active', 'inactive'
   const [overlayType, setOverlayType] = useState<{ type: string, rule?: AutomationRule }>({ type: '', rule: undefined });
+
+  const displayedRules = useMemo(() => {
+    let filtered = rules.rules;
+
+    if (filterType !== 'all') {
+      filtered = filtered.filter(r => r.trigger_type === filterType);
+    }
+
+    if (filterStatus !== 'all') {
+      filtered = filtered.filter(r => r.is_active === (filterStatus === 'active'));
+    }
+
+    const normalizedSearchTerm = searchTerm.trim().toLowerCase();
+    if (normalizedSearchTerm !== '') {
+      filtered = filtered.filter(r => r.automation_rule_name.toLowerCase().includes(normalizedSearchTerm));
+    }
+
+    return filtered;
+  }, [filterType, filterStatus, rules.rules, searchTerm]);
 
   const handleSaveRule = async (payload: AutomationRuleCreate | AutomationRuleUpdate) => {
     if (overlayType.rule?.automation_rule_id) {
@@ -39,24 +57,6 @@ export default function MainAutomation() {
     }
   };
 
-  useEffect(() => {
-    if (filterType === 'all' && filterStatus === 'all' && searchTerm.trim() === '') {
-      setDisplayedRules(rules.rules);
-      return;
-    }
-    let filtered = rules.rules;
-    if (filterType !== 'all') {
-      filtered = filtered.filter(r => r.trigger_type === filterType);
-    }
-    if (filterStatus !== 'all') {
-      filtered = filtered.filter(r => r.is_active === (filterStatus === 'active'));
-    }
-    if (searchTerm.trim() !== '') {
-      filtered = filtered.filter(r => r.automation_rule_name.toLowerCase().includes(searchTerm.toLowerCase()));
-    }
-    setDisplayedRules(filtered);
-
-  }, [filterType, filterStatus, searchTerm, rules]);
   return (
     <div className="page-shell">
       <SummaryRow rules={rules.rules} />

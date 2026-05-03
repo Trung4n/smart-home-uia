@@ -2,7 +2,6 @@ import { useEffect, useState, type Dispatch, type SetStateAction } from "react";
 import type {
   Device,
   DeviceControlHistory,
-  DeviceType,
 } from "../../types/device";
 import "./Devices.css";
 import axios from "axios";
@@ -41,7 +40,7 @@ export default function MainDevices({
       }
     }
     getCtrlHistory();
-  }, [ctrlHistory]);
+  }, []);
 
   useEffect(() => {
     if (devices.length > 0 && selectedCardId === null) {
@@ -63,7 +62,7 @@ export default function MainDevices({
     const targetDevice = devices.find((d) => d.device_id === deviceId);
     if (!targetDevice) return;
 
-    const optimisticDevice = isPowerButton
+    const optimisticDevice: Device = isPowerButton
       ? {
           ...targetDevice,
           is_active: !targetDevice.is_active,
@@ -72,7 +71,7 @@ export default function MainDevices({
           ...targetDevice,
           device_mode: (targetDevice.device_mode === "auto"
             ? "manual"
-            : "auto") as DeviceType,
+            : "auto") as Device["device_mode"],
         };
 
     setDevices((prev) =>
@@ -92,7 +91,7 @@ export default function MainDevices({
       const updatedDevice = deviceResponse.data;
       if (isPowerButton) {
         const action = optimisticDevice.is_active ? "turn_on" : "turn_off";
-        const updatedHistory = await createDeviceControlHistory(deviceId, action, null)
+        const updatedHistory = await createDeviceControlHistory(deviceId, name, action, null);
         setCtrlHistory((prev) => [...prev, updatedHistory]);
       }
       setDevices((prev) =>

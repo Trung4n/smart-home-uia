@@ -1,7 +1,7 @@
 import './StatusBar.css'
 import { useDevices } from '../../hooks/useDevices';
 export default function StatusBar() {
-  const devices = useDevices();
+  const [devices] = useDevices();
   return (
     <footer className="status-bar">
       <div className="status-seg">

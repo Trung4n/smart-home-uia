@@ -1,7 +1,7 @@
 import type {
   Device,
   DeviceControlHistory,
-  DHT20Data,
+  LiveSensorData,
 } from "../../types/device";
 import { createDeviceControlHistory } from "../../api/deviceControls";
 import { useState, type Dispatch, type SetStateAction, useRef } from "react";
@@ -52,7 +52,7 @@ function FanControl({
   device: Device;
   setCtrlHistory: Dispatch<SetStateAction<DeviceControlHistory[]>>;
 }) {
-  const tempData = useWS<DHT20Data>('/5');
+  const tempData = useWS<LiveSensorData>('/system');
   const [speed, setSpeed] = useState<string>("medium");
   const { setNotification } = useNoti();
   const handleSetSpeed = async (value: string) => {
@@ -61,6 +61,7 @@ function FanControl({
     try {
       const updatedHistory = await createDeviceControlHistory(
         device.device_id,
+        device.device_name,
         "set_speed",
         value,
       );
@@ -97,7 +98,7 @@ function FanControl({
         High
       </button>
       <div className="fan-temp" id="d3-temp">
-        {tempData ? tempData.temperature_c : 'N/A'}<span>°C</span>
+        {tempData ? tempData.temp : 'N/A'}<span>°C</span>
       </div>
     </div>
   );
@@ -147,6 +148,7 @@ function LightControl({
     try {
       const updatedHistory = await createDeviceControlHistory(
         device.device_id,
+        device.device_name,
         "set_color",
         normalizedColor,
       );
@@ -231,6 +233,7 @@ function ServoControl({
     try {
       const updatedHistory = await createDeviceControlHistory(
         device.device_id,
+        device.device_name,
         "set_angle",
         nextAngle,
       );

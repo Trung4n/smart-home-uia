@@ -1,5 +1,4 @@
 import { getSensorStatus, useThreshold } from "../../hooks/useSensorStatus";
-import type { DHT20Data, LightData } from "../../types/device";
 import { envStatusValue } from "../../utils/formatters";
 import "./environment.css";
 
@@ -8,14 +7,14 @@ export default function OverviewBar({
   humidityData,
   lightData,
 }: {
-  tempData: DHT20Data | null;
-  humidityData: DHT20Data | null;
-  lightData: LightData | null;
+  tempData: number | undefined;
+  humidityData: number | undefined;
+  lightData: number | undefined;
 }) {
   const thresholds = useThreshold();
-  const tempStatus = getSensorStatus(thresholds, 2, tempData?.temperature_c);
-  const humStatus = getSensorStatus(thresholds, 3, humidityData?.humidity_pct);
-  const lightStatus = getSensorStatus(thresholds, 1, lightData?.lux);
+  const lightStatus = getSensorStatus(thresholds, 1, lightData);
+  const tempStatus = getSensorStatus(thresholds, 2, tempData);
+  const humStatus = getSensorStatus(thresholds, 3, humidityData);
   return (
     <div className="overview-bar">
       <div className="ov-seg temp-seg">
@@ -24,7 +23,7 @@ export default function OverviewBar({
         </div>
         <span className="ov-label">Temp</span>
         <span className="ov-val" id="ov-temp">
-          {tempData?.temperature_c ?? "N/A"}
+          {tempData ? tempData : "N/A"}
         </span>
         <span className="ov-unit">°C</span>
         <span className={`ov-status ${tempStatus.toLowerCase()} ${tempStatus === "ALERT" ? "ov-blink" : ""}`} id="ov-temp-status">
@@ -39,7 +38,7 @@ export default function OverviewBar({
         </div>
         <span className="ov-label">Humidity</span>
         <span className="ov-val" id="ov-hum">
-          {humidityData?.humidity_pct ?? "N/A"}
+          {humidityData? humidityData : "N/A"}
         </span>
         <span className="ov-unit">%</span>
         <span className={`ov-status ${humStatus.toLowerCase()} ${humStatus === "ALERT" ? "ov-blink" : ""}`} id="ov-hum-status">
@@ -54,7 +53,7 @@ export default function OverviewBar({
         </div>
         <span className="ov-label">Light</span>
         <span className="ov-val" id="ov-light">
-          {lightData?.lux?.toFixed(0) ?? "N/A"}
+          {lightData ? lightData : "N/A"}
         </span>
         <span className="ov-unit">lux</span>
         <span className={`ov-status ${lightStatus.toLowerCase()} ${lightStatus === "ALERT" ? "ov-blink" : ""}`} id="ov-light-status">

@@ -58,19 +58,7 @@ export type DeviceControlRequest = {
 };
 
 export interface LiveSensorData {
-  type: string;
-  device_id: string;
-  location: string;
-  sensor: string;
-  timestamp: number;
-}
-export interface LightData extends LiveSensorData {
-  lux: number;
-  condition: string;
-}
-export interface DHT20Data extends LiveSensorData {
-  temperature_c: number;
-  heat_index_c: number;
-  comfort: string;
-  humidity_pct: number;
+  temp: number;
+  humi: number;
+  light: number;
 }

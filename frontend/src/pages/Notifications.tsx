@@ -14,7 +14,7 @@ type NotificationType = "all" | "alert" | "intrusion" | "device" | "system";
 type ReadFilter = "all" | "read" | "unread";
 
 export default function Notifications() {
-  const devices = useDevices();
+  const [devices] = useDevices();
   const [alerts, setAlerts] = useState<Alert[]>([]);
   const [typeFilter, setTypeFilter] = useState<NotificationType>("all");
   const [readFilter, setReadFilter] = useState<ReadFilter>("all");
@@ -154,8 +154,12 @@ export default function Notifications() {
   };
 
   const handlePageChange = (page: number) => {
-    setCurrentPage(page);
+    setCurrentPage(Math.min(pageCount, Math.max(1, page)));
   };
+
+  useEffect(() => {
+    setCurrentPage((prev) => Math.min(pageCount, Math.max(1, prev)));
+  }, [pageCount]);
 
   const pageSummary = useMemo(() => {
     const total = filteredAlerts.length;
