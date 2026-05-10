@@ -115,4 +115,38 @@ export const securityAPI = {
       return null;
     }
   },
+
+  async registerOwnerFace(
+    ownerName: string,
+    frame: Blob,
+  ): Promise<{ ok: boolean; message: string }> {
+    try {
+      const formData = new FormData();
+      formData.append("owner_name", ownerName);
+      formData.append("frame", frame, "face.jpg");
+
+      const response = await fetch(`${API_URL}/faces/`, {
+        method: "POST",
+        headers: await buildHeaders(),
+        body: formData,
+      });
+
+      const payload = await response.json().catch(() => ({}));
+
+      if (!response.ok) {
+        return {
+          ok: false,
+          message: payload?.message ?? payload?.detail ?? "Failed to register face",
+        };
+      }
+
+      return {
+        ok: true,
+        message: payload?.message ?? "Face registered",
+      };
+    } catch (error) {
+      console.error("Error registering face:", error);
+      return { ok: false, message: "Failed to register face" };
+    }
+  },
 };

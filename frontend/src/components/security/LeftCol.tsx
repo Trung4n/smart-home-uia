@@ -21,6 +21,7 @@ interface LeftColProps {
   streamPanelRef: RefObject<HTMLDivElement | null>;
   videoRef: RefObject<HTMLVideoElement | null>;
   canvasRef: RefObject<HTMLCanvasElement | null>;
+  processedFrameUrl: string | null;
 }
 
 export default function LeftCol({
@@ -44,11 +45,35 @@ export default function LeftCol({
   streamPanelRef,
   videoRef,
   canvasRef,
+  processedFrameUrl,
 }: LeftColProps) {
   return (
     <div className="left-col">
       <div className="stream-panel" ref={streamPanelRef}>
-        <video id="cam-video" ref={videoRef} autoPlay muted playsInline></video>
+        <video
+          id="cam-video"
+          ref={videoRef}
+          autoPlay
+          muted
+          playsInline
+          style={{
+            position: "absolute",
+            inset: 0,
+            opacity: 0,
+            pointerEvents: "none",
+          }}
+        ></video>
+
+        {cameraActive && processedFrameUrl && (
+          <img id="cam-stream-img" src={processedFrameUrl} alt="Backend stream" />
+        )}
+
+        {cameraActive && !processedFrameUrl && (
+          <div className="cam-connecting">
+            <i className="fa-solid fa-spinner fa-spin"></i>
+            <p>Waiting for backend stream...</p>
+          </div>
+        )}
 
         <canvas id="cam-canvas" ref={canvasRef}></canvas>
 

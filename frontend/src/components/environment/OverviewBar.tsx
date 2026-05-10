@@ -23,7 +23,7 @@ export default function OverviewBar({
         </div>
         <span className="ov-label">Temp</span>
         <span className="ov-val" id="ov-temp">
-          {tempData ? tempData : "N/A"}
+          {tempData ?? "N/A"}
         </span>
         <span className="ov-unit">°C</span>
         <span className={`ov-status ${tempStatus.toLowerCase()} ${tempStatus === "ALERT" ? "ov-blink" : ""}`} id="ov-temp-status">
@@ -38,7 +38,7 @@ export default function OverviewBar({
         </div>
         <span className="ov-label">Humidity</span>
         <span className="ov-val" id="ov-hum">
-          {humidityData? humidityData : "N/A"}
+          {humidityData ?? "N/A"}
         </span>
         <span className="ov-unit">%</span>
         <span className={`ov-status ${humStatus.toLowerCase()} ${humStatus === "ALERT" ? "ov-blink" : ""}`} id="ov-hum-status">
@@ -53,7 +53,7 @@ export default function OverviewBar({
         </div>
         <span className="ov-label">Light</span>
         <span className="ov-val" id="ov-light">
-          {lightData ? lightData : "N/A"}
+          {lightData ?? "N/A"}
         </span>
         <span className="ov-unit">lux</span>
         <span className={`ov-status ${lightStatus.toLowerCase()} ${lightStatus === "ALERT" ? "ov-blink" : ""}`} id="ov-light-status">

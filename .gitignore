@@ -9,3 +9,4 @@ venv/
 *.log
 *.db
 __pycache__/
+test2.html
