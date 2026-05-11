@@ -6,7 +6,6 @@ import {
   useState,
   type MutableRefObject,
 } from "react";
-import type { Alert } from "../../types/alert";
 import type { Device } from "../../types/device";
 import type {
   SecurityClip,
@@ -17,10 +16,7 @@ import type {
 import { securityAPI } from "../../services/securityAPI";
 import "./security.css";
 import LeftCol from "./LeftCol";
-import RightCol, {
-  type SecurityAlertView,
-  type SecurityMotionTone,
-} from "./RightCol";
+import RightCol, { type SecurityMotionTone } from "./RightCol";
 import SensorStatusBar from "./SensorStatusBar";
 
 const EMPTY_OVERVIEW: SecurityOverview = {
@@ -150,6 +146,7 @@ export default function MainSecurity() {
   const toastTimerRef = useRef<number | null>(null);
   const cameraWsRef = useRef<WebSocket | null>(null);
   const frameIntervalRef = useRef<number | null>(null);
+  const processedFrameUrlRef = useRef<string | null>(null);
 
   const [overview, setOverview] = useState<SecurityOverview>(EMPTY_OVERVIEW);
   const [now, setNow] = useState(() => new Date());
@@ -167,8 +164,11 @@ export default function MainSecurity() {
   const [motionFlash, setMotionFlash] = useState(false);
   const [fullscreenActive, setFullscreenActive] = useState(false);
   const [localClips, setLocalClips] = useState<SecurityClip[]>([]);
-  const [resolvingAlertId, setResolvingAlertId] = useState<number | null>(null);
   const [storageLabel, setStorageLabel] = useState("Checking...");
+  const [processedFrameUrl, setProcessedFrameUrl] = useState<string | null>(null);
+  const [ownerName, setOwnerName] = useState("");
+  const [captureBusy, setCaptureBusy] = useState(false);
+  const [captureMessage, setCaptureMessage] = useState<string | null>(null);
   const [toast, setToast] = useState<{
     message: string;
     tone: ToastTone;
@@ -195,13 +195,6 @@ export default function MainSecurity() {
   const motionLogs = useMemo(
     () => getMotionEventLogs(overview.sensorLogs, motionSensor),
     [motionSensor, overview.sensorLogs],
-  );
-
-  const securityAlerts = useMemo<Alert[]>(() => [], []);
-
-  const unresolvedCount = useMemo(
-    () => securityAlerts.filter((alert) => !alert.is_read).length,
-    [securityAlerts],
   );
 
   const todayTriggerCount = useMemo(
@@ -240,8 +233,6 @@ export default function MainSecurity() {
       : motionEnabled
         ? "Watching"
         : "Standby";
-
-  const alertViews = useMemo<SecurityAlertView[]>(() => [], []);
 
   const backendClips = useMemo<SecurityClip[]>(
     () =>
@@ -341,6 +332,12 @@ export default function MainSecurity() {
     if (video) {
       video.srcObject = null;
     }
+
+    if (processedFrameUrlRef.current) {
+      URL.revokeObjectURL(processedFrameUrlRef.current);
+      processedFrameUrlRef.current = null;
+    }
+    setProcessedFrameUrl(null);
 
     setCameraActive(false);
     setCameraBusy(false);
@@ -685,7 +682,23 @@ export default function MainSecurity() {
       resizeCanvas();
 
       const ws = new WebSocket(`${import.meta.env.VITE_WS_URL}/camera`);
+      ws.binaryType = "blob";
       cameraWsRef.current = ws;
+
+      ws.onmessage = (event) => {
+        if (!(event.data instanceof Blob)) {
+          return;
+        }
+
+        const url = URL.createObjectURL(event.data);
+        const previous = processedFrameUrlRef.current;
+        processedFrameUrlRef.current = url;
+        setProcessedFrameUrl(url);
+
+        if (previous) {
+          URL.revokeObjectURL(previous);
+        }
+      };
 
       frameIntervalRef.current = window.setInterval(() => {
         const video = videoRef.current;
@@ -830,31 +843,50 @@ export default function MainSecurity() {
     await document.exitFullscreen?.();
   });
 
-  const resolveAlert = useEffectEvent(async (notificationId: number) => {
-    const targetAlert = overview.alerts.find(
-      (alert) => alert.notification_id === notificationId,
+  const captureFace = useEffectEvent(async () => {
+    const video = videoRef.current;
+
+    if (!cameraActive || !video) {
+      showToast("Enable the camera before capturing a face", "warning");
+      return;
+    }
+
+    const trimmedName = ownerName.trim();
+    if (!trimmedName) {
+      showToast("Enter an owner name first", "warning");
+      return;
+    }
+
+    const captureCanvas = document.createElement("canvas");
+    captureCanvas.width = video.videoWidth || 640;
+    captureCanvas.height = video.videoHeight || 480;
+    const context = captureCanvas.getContext("2d");
+
+    if (!context) {
+      showToast("Capture failed", "error");
+      return;
+    }
+
+    context.drawImage(video, 0, 0, captureCanvas.width, captureCanvas.height);
+
+    setCaptureBusy(true);
+    setCaptureMessage("Sending capture...");
+
+    const blob: Blob | null = await new Promise((resolve) =>
+      captureCanvas.toBlob((b) => resolve(b), "image/jpeg", 0.85),
     );
 
-    if (!targetAlert || targetAlert.is_read) {
+    if (!blob) {
+      setCaptureBusy(false);
+      setCaptureMessage("Capture failed");
+      showToast("Capture failed", "error");
       return;
     }
 
-    setResolvingAlertId(notificationId);
-    const updated = await securityAPI.markAlertRead(notificationId, true);
-    setResolvingAlertId(null);
-
-    if (!updated) {
-      showToast("Failed to resolve alert", "error");
-      return;
-    }
-
-    setOverview((current) => ({
-      ...current,
-      alerts: current.alerts.map((alert) =>
-        alert.notification_id === notificationId ? updated : alert,
-      ),
-    }));
-    showToast("Alert resolved", "success");
+    const result = await securityAPI.registerOwnerFace(trimmedName, blob);
+    setCaptureBusy(false);
+    setCaptureMessage(result.message);
+    showToast(result.message, result.ok ? "success" : "error");
   });
 
   const playClip = useEffectEvent((clipId: string) => {
@@ -959,6 +991,11 @@ export default function MainSecurity() {
 
       cameraWsRef.current?.close();
       localClipUrlsRef.current.forEach((url) => URL.revokeObjectURL(url));
+
+      if (processedFrameUrlRef.current) {
+        URL.revokeObjectURL(processedFrameUrlRef.current);
+        processedFrameUrlRef.current = null;
+      }
     };
   }, []);
 
@@ -998,20 +1035,23 @@ export default function MainSecurity() {
           streamPanelRef={streamPanelRef}
           videoRef={videoRef}
           canvasRef={canvasRef}
+          processedFrameUrl={processedFrameUrl}
         />
         <RightCol
-          alerts={alertViews}
+          captureBusy={captureBusy}
+          captureMessage={captureMessage}
+          cameraActive={cameraActive}
           clips={clipList}
           loading={loading}
           motionLabel={motionCardLabel}
           motionStatusLabel={motionCardStatusLabel}
           motionSub={lastMotionSub}
           motionTone={motionTone}
+          onCaptureFace={captureFace}
+          onOwnerNameChange={setOwnerName}
           onPlayClip={playClip}
-          onResolveAlert={resolveAlert}
-          resolvingAlertId={resolvingAlertId}
+          ownerName={ownerName}
           triggerCount={todayTriggerCount}
-          unresolvedCount={unresolvedCount}
           lastEventLabel={lastMotionLabel}
         />
         <SensorStatusBar

@@ -2,17 +2,10 @@ import type { SecurityClip } from "../../types/security";
 
 export type SecurityMotionTone = "watching" | "detecting" | "disabled";
 
-export interface SecurityAlertView {
-  id: number;
-  message: string;
-  resolved: boolean;
-  sourceKind: "camera" | "ir";
-  sourceLabel: string;
-  timeLabel: string;
-}
-
 interface RightColProps {
-  alerts: SecurityAlertView[];
+  cameraActive: boolean;
+  captureBusy: boolean;
+  captureMessage: string | null;
   clips: SecurityClip[];
   lastEventLabel: string;
   loading: boolean;
@@ -20,11 +13,11 @@ interface RightColProps {
   motionStatusLabel: string;
   motionSub: string;
   motionTone: SecurityMotionTone;
+  onCaptureFace: () => void;
+  onOwnerNameChange: (value: string) => void;
   onPlayClip: (clipId: string) => void;
-  onResolveAlert: (alertId: number) => void;
-  resolvingAlertId: number | null;
+  ownerName: string;
   triggerCount: number;
-  unresolvedCount: number;
 }
 
 function getMotionIconClass(tone: SecurityMotionTone) {
@@ -40,7 +33,9 @@ function getMotionIconClass(tone: SecurityMotionTone) {
 }
 
 export default function RightCol({
-  alerts,
+  cameraActive,
+  captureBusy,
+  captureMessage,
   clips,
   lastEventLabel,
   loading,
@@ -48,12 +43,14 @@ export default function RightCol({
   motionStatusLabel,
   motionSub,
   motionTone,
+  onCaptureFace,
+  onOwnerNameChange,
   onPlayClip,
-  onResolveAlert,
-  resolvingAlertId,
+  ownerName,
   triggerCount,
-  unresolvedCount,
 }: RightColProps) {
+  const captureDisabled = captureBusy || !cameraActive || !ownerName.trim();
+
   return (
     <div className="right-col">
       <div className="right-panel-wrap">
@@ -84,57 +81,45 @@ export default function RightCol({
           </div>
         </div>
 
-        <div className="alert-panel">
+        <div className="face-panel">
           <div className="panel-head">
-            <div className="panel-title panel-title-between">
-              <span>Intrusion Alerts</span>
-
-              <span
-                className={`panel-badge ${unresolvedCount > 0 ? "panel-badge-danger" : "panel-badge-safe"}`}
-              >
-                {unresolvedCount > 0 ? `${unresolvedCount} NEW` : "ALL CLEAR"}
-              </span>
+            <div className="panel-title">
+              <span>Register Face</span>
             </div>
           </div>
 
-          <div className="alert-list">
-            {!loading && alerts.length === 0 && (
-              <div className="security-empty-state">
-                No security alerts yet. New intrusion events will show up here.
-              </div>
-            )}
+          <div className="face-body">
+            <label className="face-label" htmlFor="owner-name-input">
+              Owner Name
+            </label>
+            <input
+              id="owner-name-input"
+              className="face-input"
+              type="text"
+              value={ownerName}
+              placeholder="e.g. Steve"
+              onChange={(event) => onOwnerNameChange(event.target.value)}
+              disabled={captureBusy}
+            />
 
-            {alerts.map((alert, index) => (
-              <div
-                className={`alert-item ${alert.resolved ? "alert-item-resolved" : ""}`}
-                key={alert.id}
-                style={{ animationDelay: `${index * 0.04}s` }}
-              >
-                <div className={`alert-dot ${alert.resolved ? "handled" : "new"}`}></div>
-                <div className="alert-body">
-                  <div className="alert-msg">{alert.message}</div>
-                  <div className="alert-meta">
-                    <span className="alert-time">{alert.timeLabel}</span>
-                    <span
-                      className={`alert-source ${alert.sourceKind === "camera" ? "src-camera" : "src-ir"}`}
-                    >
-                      {alert.sourceLabel}
-                    </span>
-                  </div>
-                </div>
-                <button
-                  className={`btn-resolve ${alert.resolved ? "resolved" : ""}`}
-                  disabled={alert.resolved || resolvingAlertId === alert.id}
-                  onClick={() => onResolveAlert(alert.id)}
-                >
-                  {alert.resolved
-                    ? "Done"
-                    : resolvingAlertId === alert.id
-                      ? "Saving..."
-                      : "Resolve"}
-                </button>
-              </div>
-            ))}
+            <button
+              className="btn-capture-face"
+              onClick={onCaptureFace}
+              disabled={captureDisabled}
+            >
+              <i className="fa-solid fa-camera-retro"></i>
+              {captureBusy ? "Capturing..." : "Capture Face"}
+            </button>
+
+            <div className="face-hint">
+              {!cameraActive
+                ? "Enable the camera to capture a face."
+                : "Position the face in the frame, then capture."}
+            </div>
+
+            {captureMessage && (
+              <div className="face-status">{captureMessage}</div>
+            )}
           </div>
         </div>
 

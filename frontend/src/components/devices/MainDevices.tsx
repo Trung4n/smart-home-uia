@@ -59,18 +59,15 @@ export default function MainDevices({
     const targetDevice = devices.find((d) => d.device_id === deviceId);
     if (!targetDevice) return;
 
-    const optimisticDevice: Device = isPowerButton
-      ? {
-          ...targetDevice,
-          is_active: !targetDevice.is_active,
-        }
+    const updatePayload: Partial<Device> = isPowerButton
+      ? { is_active: !targetDevice.is_active }
       : {
-          ...targetDevice,
           device_mode: (targetDevice.device_mode === "auto"
-          
             ? "manual"
             : "auto") as Device["device_mode"],
         };
+
+    const optimisticDevice: Device = { ...targetDevice, ...updatePayload };
 
     setDevices((prev) =>
       prev.map((device) =>
@@ -86,7 +83,7 @@ export default function MainDevices({
     try {
       const deviceResponse = await axios.put<Device>(
         `${API_URL}/devices/${deviceId}`,
-        optimisticDevice,
+        updatePayload,
       );
 
       const updatedDevice = deviceResponse.data;
@@ -166,7 +163,7 @@ export default function MainDevices({
                       onChange={() =>
                         handleToggle(d.device_id, d.device_name, true)
                       }
-                      disabled={isOffline || isAuto}
+                      disabled={isAuto}
                     />
                     <div className="toggle-track"></div>
                     <div className="toggle-thumb"></div>
@@ -183,7 +180,6 @@ export default function MainDevices({
                       className="dev-auto-toggle"
                       checked={d.device_mode === "auto"}
                       onChange={() => handleToggle(d.device_id, d.device_name)}
-                      disabled={isOffline}
                     />
                     <div className="auto-toggle-track"></div>
                     <div className="auto-toggle-thumb"></div>
